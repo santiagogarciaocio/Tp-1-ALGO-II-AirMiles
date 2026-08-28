@@ -79,5 +79,155 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 
 \end{tad}
 
+\section{ Renombres}\\
+Promocion ES (NombrePromo,Factor,tieneTome,montoTope)\\
+MontoTope ES \Z \\
+TieneTope ES Bool\\
+Fator ES \R \\
+NombrePromo ES String\\
+Usuario ES \Z \\
+Historial ES \seq<Transaccion>\\
+Transaccion ES (Accion, Millas)\\
+enum Accion ES {"Transferir", "Recibir", "Canjear", "Acumular","Refiridor","Referido"} \\
+Millas es \Z \\
+enum Categoria ES {"Bronce","Plata","Oro","Platino"}
+
+
+
+\begin{tad}{SistemaFidelizacionAirMiles}
+\obs{historiales}{dicc{Usuario,Historial}}
+\\\obs{promociones}{\conj{Promocion}}
+\\
+\begin{proc}{crearSistema}
+{}{
+\Tipo{SistemaFidelizacionAirMiles}
+}
+\requiere{}
+\asegura{r res.promociones =  \conj{("NoPromo",1,False,0)}  Y res.historiales = <> }
+\end{proc}
+
+\begin{proc}{registrarUsuario}
+{inout am:SistemaFidelizacionAirMiles, in usuario:Usuario}{
+    \requiere{am=AM_0   INT  usuario \notin AM_0}
+    \aseguralargo{ am.historiales = setKey(AM_0.historiales,usuario,<>) \land \
+    an.promociones = AM_0.promociones}
+}
+\end{proc}
+
+\begin{proc}{registrarUsuarioConReferidor}
+{inout am:SistemaFidelizacionAirMiles, in usuarioReferido:Usuario, in usuarioReferidor:Usuario}{ \
+    \requiere{am=AM_0   \land  usuarioRefente \in AM_0 \land usuarioReferido \notin AM_0} \\
+    \aseguraLargo{ am[usuarioReferido] = <("Referido",500)> \
+    \land  am[usuarioReferidor] = agregarTransaccion(AM_0.historiales[usuarioReferidor],<("Refiridor",500)>) \
+    \land (\forall k : \Z) (k \in AM_0 \land k \neq usuarioReferidor))\implies am[k] = AM_0[k] \
+                    \land |AM_0|+1 = |am| \
+                    \land an.promociones = AM_0.promociones
+                    }
+}
+\end{proc}
+
+\begin{proc}{acumularMillas}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{canjearMillas}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{transferirMillas}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{consultarSaldo}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+\begin{proc}{consultarCategoria}{in am:SistemaFidelizacionAirMiles, in usuario:Usuario}\Tipo{Categoria}{
+    \requiere{usuario \in am.historiales}
+    \aseguraLargo{(res = "Bronces" \iff totalDeMillas(am.historiales[usuario]) < 10000 \lor \\
+            (res = "Plata" \iff (totalDeMillas(am.historiales[usuario]) >= 10000 \land totalDeMillas(am.historiales[usuario]) < 50000) \lor \\
+            (res = "Oro" \iff (totalDeMillas(am.historiales[usuario]) >= 50000 \land totalDeMillas(am.historiales[usuario]) < 1000000)) \lor \\
+            (res = "Platino" \iff totalDeMillas(am.historiales[usuario]) >= 1000000) \\
+    }
+}
+\end{proc}
+
+\begin{proc}{rankingMillas}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{resumenTransacciones}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{iniciarPromocion}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{iniciarPromocionConTope}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{finalizarPromocion}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{elMasAcumulador}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{elMasCanjeador}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\begin{proc}{paresTransferidoresExclusivos}
+{}{
+\Tipo{}
+}
+\end{proc}
+
+
+\aux{millasDisponibles}{u: Usuario}{\R}{} \\
+\aux{millasTotales}{histUs: Historial}{\R}{\sum_{i=0}^{|histUs-1|} IfThenElse(histUs[i]_0 = "Transferir", -1*histUs[i],histUs[i]}
+\aux{agregarTransaccion}{historialViejo: Historial, transaccionNueva :<Transaccion>}{Historial}{historialViejo ++ transaccionNueva}
+
+
+
+
+
+\end{tad}
+
 
 \end{document}
