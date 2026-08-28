@@ -82,16 +82,19 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \section{Renombres}
 
 \begin{itemize}
-    \item[] Promocion ES $\tupla{NombrePromo X Factor X tieneTope X montoTope}$
+    \item[]PromocionesActivas ES $\seq{\tupla{Factor X tieneTope X montoTope}}$
+    \items[]Promocion ES $\tupla{Factor X tieneTope X montoTope}$
     \item[]MontoTope ES $\mathbb{Z}$ 
     \item[]TieneTope ES Bool
     \item[]Factor ES $\mathbb{R}$ 
-    \item[]NombrePromo ES String
+    \item[]NombrePromocion ES String
     \item[]Usuario ES $\mathbb{Z}$  
-    \item[]Historial ES $\seq{Transaccion}$
+    \item[]HistorialTransaccion ES $\seq{Transaccion}$
+    \item[]HistorialVuelo ES $\seq{Vuelos}$
+    \item[]Vuelos ES $\tupla{Distancia,Millas,NombrePromocion,Factor}$
     \item[]Transaccion ES $\tupla{Accion X Millas}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Refiridor","Referido" \}\ 
-    \item[]Millas ES $\mathbb{Z}$ 
+    \item[]Millas ES $\mathbb{Z}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     
 \end{itemize}
@@ -100,9 +103,11 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \begin{tad}{AirMiles}
 
 
-\obs{historiales}{\Diccionario{Usuario}{Historial} }
+\obs{historialesVuelos}{\Diccionario{Usuario}{HistorialVuelo} }
 \\
-\obs{promociones}{\conj{Promocion}}
+\obs{historialesTransacciones}{\Diccionario{Usuario}{HistorialTransaccion} }
+\\
+\obs{promociones}{\Diccionario{NombrePromocion}{PromocionesActivas}}
 \\
 
 
@@ -112,8 +117,9 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 }
     \requiere{True}
     \aseguraLargo{
-        res.promociones =  \conj{("NoPromo",1,False,0)}  \land \\
-        res.historiales = <> 
+        res.promociones =  <"NoPromo":(1,False,0)>  \land \\
+        res.historialesVuelos = <> \land \\
+        res.historialesTransacciones = <> 
         }
 \end{proc}
 
@@ -123,9 +129,10 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \In usuario:Usuario
 }
 {}
-    \requiere{am=AM_0   \land  usuario \notin AM_0.historiales}
-    \aseguralargo{ 
-        am.historiales = setKey(AM_0.historiales,usuario,<>) \land \\
+    \requiere{am=AM_0   \land  usuario \notin AM_0.historialesVuelos }
+    %no se si pedir tmb que no este en historialesTransacciones. Deberia bastar con chequear solo uno xq tienen las mismas claves los dos diccs
+    \aseguralargo{am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario) \land \\
+        am.historialesTransacciones = añadirUsuario(AM_0.historialesTransacciones,usuario) \land \\
         an.promociones = AM_0.promociones
         }
 \end{proc}
@@ -138,39 +145,83 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 }{
 } 
     \requiere{am=AM_0   \land  usuarioRefente \in AM_0 \land usuarioReferido \notin AM_0} 
-    \aseguraLargo{ am.historiales[usuarioReferido] = \conj{("Referido",500)} \land \\
-        am.historiales[usuarioReferidor] = agregarTransaccion(AM_0.historiales[usuarioReferidor],("Refiridor",500))\land \\
-        (\forall k : \Z) (k \in AM_0 \ \yLuego \ k \neq usuarioReferidor))\implicaLuego (am.historiales[k] = AM_0.historiales[k]) \land \\
-        |AM_0.historiales|+1 = |am.historiales| \land \\
-        an.promociones = AM_0.promociones
+    \aseguraLargo{  
+        am.historialesTransacciones[usuarioReferidor] = agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],("Refiridor",500))\land \\
+        igualesSalvoUsuario(AM_0.historialesTransacciones, am.historialesTransacciones,$\seq{usuarioReferidor}$) \land \\  
+        |AM_0.historialesTransacciones|+1 = |am.historialesTransacciones| \land \\        
+        am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario) \land \\
+        igualesSalvoUsuario(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuarioReferidor}$) \land \\
+        |AM_0.historialesVuelos|+1 = |am.historialesVuelos| \land \\        
+        am.promociones = AM_0.promociones
                     }
 \end{proc}
 
 \begin{proc}{acumularMillas}
-{}{
+{
+\Inout am:AirMiles,
+\In usuario:Usuario,
+\In distancia: $\mathbb{R}$
+\In promocion: NombrePromocion
+}{
 \Tipo{}
 }
+    \requiere{am=AM_0 \land usuario \in AM_0.historiales \land promocion \in AM_0.promociones \land distancia>0}
+    \aseguraLargo{am.promociones = AM_0.promociones \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuario}$) \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, $\seq{usuario}$) \land \\
+        am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario], 
+        %me doy por vencido por el momento con esta
+        
+    }
 \end{proc}
 
 
 \begin{proc}{canjearMillas}
-{}{
+{
+\Inout am:AirMiles,
+\In usuario:Usuario,
+\In millas:Millas
+}{
 \Tipo{}
 }
+    \requiere{am=AM_0 \land usuario\in AM_0.historialesTransacciones[usuario] \land millas <= millasDisponibles(AM_0.historialTransacciones[usuario]}
+    \aseguraLargo{
+        am.promociones = AM_0.promociones \land \\
+        am.historialViajes = AM_0.historialViajes \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialTransaccions, am.historialTransaccions, $\seq{usuario}$) \land \\
+        am.historialTransacciones[usuario] = agregarTransaccion(AM_0.historialTransacciones[usuario], $\tupla{"Canjear",millas}$
+                }
 \end{proc}
 
 
 \begin{proc}{transferirMillas}
-{}{
+{
+\Inout am:AirMiles,
+\In dador : Usuario,
+\In receptor : Usuario,
+\In millasTransf : Millas
+}{
 \Tipo{}
-}
+}    
+    \requiere{am=AM_0 \land dador \in AM_0.historialesTransacciones \land receptor \in AM_0.historialesTransacciones \land millasDisponibles(AM_0.historialTransacciones[Dador] >= millasTasnf}
+    \aseguraLargo{am.promociones = AM_0.promociones \land \\
+                AM_0.historialVuelos = am.historialVuelos \land \\
+                igualesSalvoUsuarioIdaVuelta(AM_0.historialTransacciones, am.historialTransacciones, $\seq{dador,receptor}$) \land \\
+                am.historialTransacciones[dador] = agregarTransaccion(AM_0.historialTransacciones[dador],$\tupla{"Transferir",millasTransf}$) \land \\
+                am.historialTransacciones[dador] = agregarTransaccion(AM_0.historialTransacciones[receptor],$\tupla{"Recibir",millasTransf}$)
+                    }  
 \end{proc}
 
 
 \begin{proc}{consultarSaldo}
-{}{
-\Tipo{}
+{
+\In am:AirMiles,
+\In usuario:Usuario
+}{
+\Tipo{Millas}
 }
+    \requiere{usuario \in am.historialTransacciones}
+    \aseguraLargo{res = millasDisponibles(am.historialTransacciones[usuario]}
 \end{proc}
 
 \begin{proc}{consultarCategoria}{
@@ -195,14 +246,22 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 
 
 \begin{proc}{resumenTransacciones}
-{}{
-\Tipo{}
+{
+\In am:AirMiles,
+\In usuario:Usuario
+}{
+\Tipo{$\tupla{MillasXMillasXMillas}$}
 }
+    \requiere{usuario \in am.historialesTransacciones}
+    \aseguraLargo{res_0 = acumuladoPorViajes(am.historialesTransacciones[usuario]) \land \\
+                res_1=totalCanjeadas(am.historialesTransacciones[usuario]) \land \\
+                res_2=totalTransferidas(am.historialesTransacciones[usuario])}
 \end{proc}
 
 
 \begin{proc}{iniciarPromocion}
-{}{
+{
+}{
 \Tipo{}
 }
 \end{proc}
@@ -243,21 +302,32 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \end{proc}
 
 
-\aux{millasDisponibles}{u: Usuario}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(esUso(hist[i]_0), -1*hist[i], hist[i])$} 
+\aux{millasDisponibles}{hist: Historial}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(esUso(hist[i]_0), -1*hist[i], hist[i])$} 
 \\
 \pred{esUso}{accion:Accion}{ accion \in \ $$\seq{Canjear, Transferir}$$ }
-
 \\
 \aux{millasTotales}{hist: Historial}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(hist[i]_0 = "Transferir", -1*hist[i], hist[i])$}
 \\
 \aux{agregarTransaccion}{historialViejo: Historial,  transaccionNueva :Transaccion}{Historial}{historialViejo ++ <transaccionNueva>} 
+\\
+\aux{añadirUsuario}{baseDeDatos:$\Diccionario{Usuario}{\seq{T}}$, usuario:Usuario}{$\Diccionario{Usuario}{\seq{T}}$}{setKey(baseDeDatos,usuario,\texttt{<>}) }
+\\
+\pred{igualesSalvoUsuario}{dictControl : $\Diccionario{Usuario}{\seq{T}}$ , dictAlterado : $\Diccionario{Usuario}{\seq{T}}$ , usuariosModificado: $\seq{usuario}$}{(\forall k : \Z) (k \in dictControl \ \yLuego \ k \neq usuariosModificado))\implicaLuego (dictControl[k] = dictAlterado[k]) }
+\\
+\pred{igualesSalvoUsuarioIdaVuelta}{dict1 : $\Diccionario{Usuario}{\seq{T}}$ , dict2 : $\Diccionario{Usuario}{\seq{T}}$ , usuariosModificado: $\seq{usuario}$}{
+(\forall k : \Z) (k \in dict1 \ \yLuego \ k \neq usuariosModificado))\implicaLuego (dict1[k] = dict2[k]) \land \\
+(\forall q : \Z) (k \in dict2 \ \yLuego \ q \neq usuariosModificado))\implicaLuego (dict1[q] = dict2[q])
+}
+\\
+\aux{acumuladoPorViajes}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 ="Acumular",historial[i]_1,0)}
+\\
+\aux{totalCanjeadas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 ="Canjear",historial[i]_1,0)}
+\\
+\aux{totalTransferidas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 \in \seq{"Transferir","Recibir"},historial[i]_1,0)}
 
 
 
 \end{tad}
-
-
-\end{document}
 
 
 \end{document}
