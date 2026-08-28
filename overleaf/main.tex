@@ -79,51 +79,71 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 
 \end{tad}
 
-\section{ Renombres}\\
-Promocion ES (NombrePromo,Factor,tieneTome,montoTope)\\
-MontoTope ES \Z \\
-TieneTope ES Bool\\
-Fator ES \R \\
-NombrePromo ES String\\
-Usuario ES \Z \\
-Historial ES \seq<Transaccion>\\
-Transaccion ES (Accion, Millas)\\
-enum Accion ES {"Transferir", "Recibir", "Canjear", "Acumular","Refiridor","Referido"} \\
-Millas es \Z \\
-enum Categoria ES {"Bronce","Plata","Oro","Platino"}
+\section{Renombres}
+
+\begin{itemize}
+    \item[] Promocion ES $\tupla{NombrePromo X Factor X tieneTope X montoTope}$
+    \item[]MontoTope ES $\mathbb{Z}$ 
+    \item[]TieneTope ES Bool
+    \item[]Factor ES $\mathbb{R}$ 
+    \item[]NombrePromo ES String
+    \item[]Usuario ES $\mathbb{Z}$  
+    \item[]Historial ES $\seq{Transaccion}$
+    \item[]Transaccion ES $\tupla{Accion X Millas}$
+    \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Refiridor","Referido" \}\ 
+    \item[]Millas ES $\mathbb{Z}$ 
+    \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
+    
+\end{itemize}
 
 
+\begin{tad}{AirMiles}
 
-\begin{tad}{SistemaFidelizacionAirMiles}
-\obs{historiales}{dicc{Usuario,Historial}}
-\\\obs{promociones}{\conj{Promocion}}
+
+\obs{historiales}{\Diccionario{Usuario}{Historial} }
 \\
+\obs{promociones}{\conj{Promocion}}
+\\
+
+
 \begin{proc}{crearSistema}
 {}{
-\Tipo{SistemaFidelizacionAirMiles}
+\Tipo{AirMiles}
 }
-\requiere{}
-\asegura{r res.promociones =  \conj{("NoPromo",1,False,0)}  Y res.historiales = <> }
+    \requiere{True}
+    \aseguraLargo{
+        res.promociones =  \conj{("NoPromo",1,False,0)}  \land \\
+        res.historiales = <> 
+        }
 \end{proc}
 
 \begin{proc}{registrarUsuario}
-{inout am:SistemaFidelizacionAirMiles, in usuario:Usuario}{
-    \requiere{am=AM_0   INT  usuario \notin AM_0}
-    \aseguralargo{ am.historiales = setKey(AM_0.historiales,usuario,<>) \land \
-    an.promociones = AM_0.promociones}
+{
+\Inout am:AirMiles, 
+\In usuario:Usuario
 }
+{}
+    \requiere{am=AM_0   \land  usuario \notin AM_0.historiales}
+    \aseguralargo{ 
+        am.historiales = setKey(AM_0.historiales,usuario,<>) \land \\
+        an.promociones = AM_0.promociones
+        }
 \end{proc}
 
 \begin{proc}{registrarUsuarioConReferidor}
-{inout am:SistemaFidelizacionAirMiles, in usuarioReferido:Usuario, in usuarioReferidor:Usuario}{ \
-    \requiere{am=AM_0   \land  usuarioRefente \in AM_0 \land usuarioReferido \notin AM_0} \\
-    \aseguraLargo{ am[usuarioReferido] = <("Referido",500)> \
-    \land  am[usuarioReferidor] = agregarTransaccion(AM_0.historiales[usuarioReferidor],<("Refiridor",500)>) \
-    \land (\forall k : \Z) (k \in AM_0 \land k \neq usuarioReferidor))\implies am[k] = AM_0[k] \
-                    \land |AM_0|+1 = |am| \
-                    \land an.promociones = AM_0.promociones
+{
+\Inout am:AirMiles, 
+\In usuarioReferido:Usuario, 
+\In usuarioReferidor:Usuario
+}{
+} 
+    \requiere{am=AM_0   \land  usuarioRefente \in AM_0 \land usuarioReferido \notin AM_0} 
+    \aseguraLargo{ am.historiales[usuarioReferido] = \conj{("Referido",500)} \land \\
+        am.historiales[usuarioReferidor] = agregarTransaccion(AM_0.historiales[usuarioReferidor],("Refiridor",500))\land \\
+        (\forall k : \Z) (k \in AM_0 \ \yLuego \ k \neq usuarioReferidor))\implicaLuego (am.historiales[k] = AM_0.historiales[k]) \land \\
+        |AM_0.historiales|+1 = |am.historiales| \land \\
+        an.promociones = AM_0.promociones
                     }
-}
 \end{proc}
 
 \begin{proc}{acumularMillas}
@@ -153,14 +173,18 @@ enum Categoria ES {"Bronce","Plata","Oro","Platino"}
 }
 \end{proc}
 
-\begin{proc}{consultarCategoria}{in am:SistemaFidelizacionAirMiles, in usuario:Usuario}\Tipo{Categoria}{
+\begin{proc}{consultarCategoria}{
+\In am:AirMiles,
+\In usuario:Usuario
+}{
+\Tipo{Categoria}
+}
     \requiere{usuario \in am.historiales}
     \aseguraLargo{(res = "Bronces" \iff totalDeMillas(am.historiales[usuario]) < 10000 \lor \\
-            (res = "Plata" \iff (totalDeMillas(am.historiales[usuario]) >= 10000 \land totalDeMillas(am.historiales[usuario]) < 50000) \lor \\
-            (res = "Oro" \iff (totalDeMillas(am.historiales[usuario]) >= 50000 \land totalDeMillas(am.historiales[usuario]) < 1000000)) \lor \\
+            (res = "Plata" \iff (totalDeMillas(am.historiales[usuario] >= 10000 \land totalDeMillas(am.historiales[usuario]) < 50000) \lor \\
+            (res = "Oro" \iff (totalDeMillas(am.historiales[usuario]) >= 50000 \land totalDeMillas(am.historiales[usuario]) < 1000000) \lor \\
             (res = "Platino" \iff totalDeMillas(am.historiales[usuario]) >= 1000000) \\
-    }
-}
+            }
 \end{proc}
 
 \begin{proc}{rankingMillas}
@@ -219,15 +243,21 @@ enum Categoria ES {"Bronce","Plata","Oro","Platino"}
 \end{proc}
 
 
-\aux{millasDisponibles}{u: Usuario}{\R}{} \\
-\aux{millasTotales}{histUs: Historial}{\R}{\sum_{i=0}^{|histUs-1|} IfThenElse(histUs[i]_0 = "Transferir", -1*histUs[i],histUs[i]}
-\aux{agregarTransaccion}{historialViejo: Historial, transaccionNueva :<Transaccion>}{Historial}{historialViejo ++ transaccionNueva}
+\aux{millasDisponibles}{u: Usuario}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(esUso(hist[i]_0), -1*hist[i], hist[i])$} 
+\\
+\pred{esUso}{accion:Accion}{ accion \in \ $$\seq{Canjear, Transferir}$$ }
 
-
+\\
+\aux{millasTotales}{hist: Historial}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(hist[i]_0 = "Transferir", -1*hist[i], hist[i])$}
+\\
+\aux{agregarTransaccion}{historialViejo: Historial,  transaccionNueva :Transaccion}{Historial}{historialViejo ++ <transaccionNueva>} 
 
 
 
 \end{tad}
+
+
+\end{document}
 
 
 \end{document}
