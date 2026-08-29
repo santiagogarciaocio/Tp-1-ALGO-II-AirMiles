@@ -7,7 +7,7 @@
 
 
 \titulo{Trabajo práctico}
-\subtitulo{El subtitulo adecuado}
+\subtitulo{Especificacion TAD: Sistema de Fidelizaci´on AirMiles}
 
 \fecha{\today}
 
@@ -35,65 +35,22 @@
 
 \maketitle
 
-\section{Macros para escribir en LaTeX}
-
-Para facilitar la escritura del trabajo práctico en LaTeX, les proveemos de varias macros que les permitirán escribir especificaciones en lógica de primer orden.
-Por ejemplo, podrán hacer uso de comandos que definen los conectores lógicos: $\land, \lor, \implica$ y también los operadores de la lógica trivaluada $\yLuego$, $\oLuego$, $\implicaLuego$.
-
-Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x \geq 0 \lor x < 0}$, $\existe{x}{\mathbb{Z}}{x \geq 0}$. A estos comandos se les puede agregar un \texttt{Largo} al final para que ocupen múltiples renglones.
-
-\section{Ejemplos de uso de las macros}
-
-
-\begin{tad}{EjemploDeTAD}
-
-
-\obs{secuenciaDeCaracteres}{\seq{\cha}}
-\\
-\obs{conjuntoDeTuplas}{\conj{\tupla{nombre: \seq{\cha}, apellido: \seq{\cha}}}}
-\\
-
-
-\begin{proc}{crearTAD}
-{
-\In caracteres: \seq{\cha},
-\In secuenciaDeNombres: \seq{\tupla{nombre: \seq{\cha}, apellido: \seq{\cha}}}
-}{
-\Tipo{EjemploDeTAD}
-}
-    \requiere{predicadoUnilinea(caracteres)}
-    \asegura{res.secuenciaDeCaracteres = caracteres}
-    \aseguraLargo{ \norm{res.conjuntoDeTuplas} = \norm{secuenciaDeNombres} \land \\predicadoMultilinea(secuenciaDeNombres, res.conjuntoDeTuplas) }
-\end{proc}
-
-\predLargo{predicadoMultilinea}{s: \seq{\cha}, conjunto: \conj{\tupla{\seq{\cha}, \seq{\cha}}}}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{s} 
-    \implicaLuego s[i] \in c}
-}
-
-\pred{predicadoUnilínea}{s: \seq{\cha}}{
-    \norm{s} > 0
-}
-
-\aux{unAuxiliar}{k: \Z,l: \Z}{\Z}{\norm{k-l}}
-
-\end{tad}
-
 \section{Renombres}
 
 \begin{itemize}
-    \item[]PromocionesActivas ES $\seq{\tupla{Factor X tieneTope X montoTope}}$
-    \items[]Promocion ES $\tupla{Factor X tieneTope X montoTope}$
-    \item[]MontoTope ES $\mathbb{Z}$ 
-    \item[]TieneTope ES Bool
-    \item[]Factor ES $\mathbb{R}$ 
     \item[]NombrePromocion ES String
+    \item[]PromocionesActivas ES $\seq{\tupla{Factor X tieneTope X montoTope}}$
+    \item[]Factor ES $\mathbb{R}$ 
+    \item[]TieneTope ES Bool
+    \item[]MontoTope ES $\mathbb{Z}$    
     \item[]Usuario ES $\mathbb{Z}$  
+    \item[]HistorialVuelo ES $\seq{Vuelo}$
     \item[]HistorialTransaccion ES $\seq{Transaccion}$
-    \item[]HistorialVuelo ES $\seq{Vuelos}$
-    \item[]Vuelos ES $\tupla{Distancia,Millas,NombrePromocion,Factor}$
-    \item[]Transaccion ES $\tupla{Accion X Millas}$
-    \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Refiridor","Referido" \}\ 
+    \item[]Vuelo ES $\tupla{Distancia,Millas,NombrePromocion,Factor}$
+    \item[]Distancia ES $\mathbb{R}$
+    \item[]Transaccion ES $\tupla{Accion X Millas X Comentario}$
+    \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\ 
+    \item[]Comentario es String 
     \item[]Millas ES $\mathbb{Z}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     
@@ -132,8 +89,8 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
     \requiere{am=AM_0   \land  usuario \notin AM_0.historialesVuelos }
     %no se si pedir tmb que no este en historialesTransacciones. Deberia bastar con chequear solo uno xq tienen las mismas claves los dos diccs
     \aseguraLargo{
-        am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario) \land \\
-        am.historialesTransacciones = añadirUsuario(AM_0.historialesTransacciones,usuario) \land \\
+        am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario)\ \land \\
+        am.historialesTransacciones = añadirUsuario(AM_0.historialesTransacciones,usuario)\ \land 
         an.promociones = AM_0.promociones
         }
 \end{proc}
@@ -141,17 +98,17 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \begin{proc}{registrarUsuarioConReferidor}
 {
 \Inout am:AirMiles, 
-\In usuarioReferido:Usuario, 
-\In usuarioReferidor:Usuario
-}{
-} 
-    \requiere{am=AM_0   \land  usuarioRefente \in AM_0 \land usuarioReferido \notin AM_0} 
+\In usuarioReferido:Usuario, \\
+\In usuarioReferidor: Usuario
+}{} 
+    \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historialesTransacciones \land\\
+    usuarioReferido \notin AM_0.historialesTransacciones} 
     \aseguraLargo{  
-        am.historialesTransacciones[usuarioReferidor] = agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],("Refiridor",500))\land \\
-        igualesSalvoUsuario(AM_0.historialesTransacciones, am.historialesTransacciones,$\seq{usuarioReferidor}$) \land \\  
+        am.historialesTransacciones[usuarioReferidor] = agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],("Refiridor",500,"Referido"))\land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones,\seq{usuarioReferidor}) \land \\  
         |AM_0.historialesTransacciones|+1 = |am.historialesTransacciones| \land \\        
         am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario) \land \\
-        igualesSalvoUsuario(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuarioReferidor}$) \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, \seq{usuarioReferidor}) \land \\
         |AM_0.historialesVuelos|+1 = |am.historialesVuelos| \land \\        
         am.promociones = AM_0.promociones
                     }
@@ -161,15 +118,14 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 {
 \Inout am:AirMiles,
 \In usuario:Usuario,
-\In distancia: $\mathbb{R}$
+\In distancia: $\mathbb{R}$,
 \In promocion: NombrePromocion
-}{
-\Tipo{}
-}
-    \requiere{am=AM_0 \land usuario \in AM_0.historiales \land promocion \in AM_0.promociones \land distancia>0}
+}{}
+    \requiere{am=AM_0\  \land \ usuario \in AM_0.historiales\  \land \ promocion \in AM_0.promociones\  \land \ distancia>0}
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuario}$) \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, $\seq{usuario}$) \land \\
+        am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones,$\seq{\tupla{"Acumular",millasVuelo(distancia,categoria,facto)}}$ \land \\
         am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario], 
         %me doy por vencido por el momento con esta
         
@@ -182,15 +138,15 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \Inout am:AirMiles,
 \In usuario:Usuario,
 \In millas:Millas
-}{
-\Tipo{}
-}
-    \requiere{am=AM_0 \land usuario\in AM_0.historialesTransacciones[usuario] \land millas <= millasDisponibles(AM_0.historialTransacciones[usuario]}
+}{}
+    \requiere{am=AM_0\  \land \ usuario\in AM_0.historialesTransacciones[usuario]\  \land \ millas \leq millasDisponibles(AM_0.historialTransacciones[usuario])}
+    %quizas es mas declarativo tener millasDisponibles(AM_0.historialTransacciones,usuario)
+    %Con los corchete me hace 'ruido' tipo programacion y no tanto escribir logica
     \aseguraLargo{
         am.promociones = AM_0.promociones \land \\
         am.historialViajes = AM_0.historialViajes \land \\
-        igualesSalvoUsuarioIdaVuelta(AM_0.historialTransaccions, am.historialTransaccions, $\seq{usuario}$) \land \\
-        am.historialTransacciones[usuario] = agregarTransaccion(AM_0.historialTransacciones[usuario], $\tupla{"Canjear",millas}$
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialTransaccions, am.historialTransaccions,\\ \seq{usuario}) \land \\
+        am.historialTransacciones[usuario] = \\agregarTransaccion(AM_0.historialTransacciones[usuario], \tupla{"Canjear"XmillasX""})
                 }
 \end{proc}
 
@@ -199,17 +155,15 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 {
 \Inout am:AirMiles,
 \In dador : Usuario,
-\In receptor : Usuario,
-\In millasTransf : Millas
-}{
-\Tipo{}
-}    
-    \requiere{am=AM_0 \land dador \in AM_0.historialesTransacciones \land receptor \in AM_0.historialesTransacciones \land millasDisponibles(AM_0.historialTransacciones[Dador] >= millasTasnf}
+\In receptor : Usuario,\\
+\In millasTrans : Millas
+}{}    
+    \requiere{am=AM_0 \land dador \in AM_0.historialesTransacciones \land \\receptor \in AM_0.historialesTransacciones\ \land \\ millasDisponibles(AM_0.historialTransacciones[Dador]) \geq millasTrans}
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
-                AM_0.historialVuelos = am.historialVuelos \land \\
-                igualesSalvoUsuarioIdaVuelta(AM_0.historialTransacciones, am.historialTransacciones, $\seq{dador,receptor}$) \land \\
-                am.historialTransacciones[dador] = agregarTransaccion(AM_0.historialTransacciones[dador],$\tupla{"Transferir",millasTransf}$) \land \\
-                am.historialTransacciones[dador] = agregarTransaccion(AM_0.historialTransacciones[receptor],$\tupla{"Recibir",millasTransf}$)
+                am.historialVuelos = AM_0.historialVuelos \land \\
+                igualesSalvoUsuarioIdaVuelta(AM_0.historialTransacciones, am.historialTransacciones,\\ \seq{dador,receptor}) \land \\
+                am.historialTransacciones[dador] = agregarTransaccion(AM_0.historialTransacciones[dador],\\ \tupla{"Transferir"XmillasTransXreceptor}) \land \\
+                am.historialTransacciones[receptor] = agregarTransaccion(AM_0.historialTransacciones[receptor],\\ \tupla{"Recibir"XmillasTransXdador})
                     }  
 \end{proc}
 
@@ -222,7 +176,7 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \Tipo{Millas}
 }
     \requiere{usuario \in am.historialTransacciones}
-    \aseguraLargo{res = millasDisponibles(am.historialTransacciones[usuario]}
+    \aseguraLargo{res = millasDisponibles(am.historialTransacciones[usuario])}
 \end{proc}
 
 \begin{proc}{consultarCategoria}{
@@ -231,26 +185,25 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 }{
 \Tipo{Categoria}
 }
-    \requiere{usuario \in am.historiales}
-    \aseguraLargo{(res = "Bronces" \iff totalDeMillas(am.historiales[usuario]) < 10000 \lor \\
-            (res = "Plata" \iff (totalDeMillas(am.historiales[usuario] >= 10000 \land totalDeMillas(am.historiales[usuario]) < 50000) \lor \\
-            (res = "Oro" \iff (totalDeMillas(am.historiales[usuario]) >= 50000 \land totalDeMillas(am.historiales[usuario]) < 1000000) \lor \\
-            (res = "Platino" \iff totalDeMillas(am.historiales[usuario]) >= 1000000) \\
+    \requiere{usuario \in am.historialesTransacciones}
+    \aseguraLargo{(res = "Bronces" \iff totalDeMillas(am.historialesTransacciones[usuario]) < 10.000) \lor \\
+            (res = "Plata" \iff (totalDeMillas(am.historialesTransacciones[usuario] \geq 10.000 \land totalDeMillas(am.historialesTransacciones[usuario]) < 50.000) \lor \\
+            (res = "Oro" \iff (totalDeMillas(am.historialesTransacciones[usuario]) \geq 50.000 \land totalDeMillas(am.historialesTransacciones[usuario]) < 1.000.000) \lor \\
+            (res = "Platino" \iff totalDeMillas(am.historialesTransacciones[usuario]) \geq 1.000.000) \\
             }
 \end{proc}
 
 \begin{proc}{rankingMillas}
 {
-\In am:AirMiles
+\In am:AirMiles,
 \In n:$\mathbb{Z}$
 }{
-\Tipo{$\seq{Usuario}$}
+\Tipo{\seq{Usuario}}
 }
     \requiere{n > 0}
     \aseguraLargo{
-        (n >=|am.historialesTransacciones| \yluego res = claves(am.historialesTransacciones)) \lor_l \\
-        ((\forall i \in $\mathbb{Z}$)(0 \geq i < n \yluego rankingMillasDisponibles(am.historialesTransacciones,res[i]) <= n)  \land_l \\
-        |res| = n )                      
+        (n \geq |am.historialesTransacciones| \implicaLuego res = claves(am.historialesTransacciones)) \lor_l 
+        ((\forall i \in \Z)(0 \geq i < n \implicaLuego rankingMillasDisponibles(am.historialesTransacciones,res[i]) \geq n)  \yLuego |res| = n )                      
     }
 \end{proc}
 
@@ -263,7 +216,7 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \In am:AirMiles,
 \In usuario:Usuario
 }{
-\Tipo{$\tupla{MillasXMillasXMillas}$}
+\Tipo{\tupla{MillasXMillasXMillas}}
 }
     \requiere{usuario \in am.historialesTransacciones}
     \aseguraLargo{res_0 = acumuladoPorViajes(am.historialesTransacciones[usuario]) \land \\
@@ -277,30 +230,26 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \Inout am:AirMiles,
 \In nombrePromocion : NombrePromocion,
 \In factor : Factor
-}{
-\Tipo{}
-}
-    \requiere{am=AM_0 \land factor >= 1 \land nombrePromocion \notin AM_0.promociones}
-    \aseguraLargo{|am.historialesTransacciones| = |AM_0.historialesTransacciones| \land \\
-        |am.historialesVuelos| = |AM_0.historialesVuelos| \land \\
-        am.promociones = añadirPromocionSinTope(historialesVuelos,nombrePromocion,factor)
-    }
+}{}
+    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promociones}
+    \aseguraLargo{am.historialesTransacciones = AM_0.historialesTransacciones \land \\
+        am.historialesVuelos = AM_0.historialesVuelos \land \\
+        am.promociones = añadirPromocionSinTope(AM_0.promociones,nombrePromocion,factor)
+        }
 \end{proc}
 
 
 \begin{proc}{iniciarPromocionConTope}
 {
 \Inout am:AirMiles,
-\In nombrePromocion : NombrePromocion,
-\In factor : Factor
+\In nombrePromocion : NombrePromocion, \\
+\In factor : Factor,
 \In montoTope : MontoTope
-}{
-\Tipo{}
-}
+}{}
     \requiere{am=AM_0 \land factor >= 1 \land nombrePromocion \notin AM_0.promociones}
-    \aseguraLargo{|am.historialesTransacciones| = |AM_0.historialesTransacciones| \land \\
-        |am.historialesVuelos| = |AM_0.historialesVuelos| \land \\
-        am.promociones = añadirPromocionConTope(historialesVuelos,nombrePromocion,factor,montoTope)
+    \aseguraLargo{am.historialesTransacciones = AM_0.historialesTransacciones \land \\
+        am.historialesVuelos = AM_0.historialesVuelos \land \\
+        am.promociones = añadirPromocionConTope(AM_0.promociones,nombrePromocion,factor, montoTope)
     }
 \end{proc}
 
@@ -308,29 +257,27 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 \begin{proc}{finalizarPromocion}
 {
 \Inout am:AirMiles,
-\In nombrePromocion : NombrePromocion,
-}{
-\Tipo{}
-}
-    \requiere{am=AM_0 \land  nombrePromocion \in AM_0.promociones \land nombrePromocion \neq "NoPromo"}
-    \aseguraLargo{|am.historialesTransacciones| = |AM_0.historialesTransacciones| \land \\
-        |am.historialesVuelos| = |AM_0.historialesVuelos| \land \\
-        am.promociones = eliminarPromocion(historialesVuelos,nombrePromocion)
+\In nombrePromocion : NombrePromocion
+}{}
+    \requiere{am=AM_0\ \land  \ bnombrePromocion \in AM_0.promociones\ \land \ nombrePromocion \neq "NoPromo"}
+    \aseguraLargo{am.historialesTransacciones = AM_0.historialesTransacciones \land \\
+        am.historialesVuelos = AM_0.historialesVuelos \land \\
+        am.promociones = eliminarPromocion(AM_0.promociones,nombrePromocion)
     }
 \end{proc}
 
 
-\begin{proc}{elMasAcumulador}
+\begin{proc}{elQueTieneMasMillas}
 {
 \In am:AirMiles
 }{
 \Tipo{Usuario}
 }
-    \requiere{}
+    \requiere{True}
+    %no se si esta bie npedir no vacio o si deberia tener que aceptar el vacio y devolver nada
     \aseguraLargo{
         res \in am.historialesTransacciones \land \\
-        (\forall k \in $\mathbb{Z}$)(k \in am.historialesTransacciones \yluego totalGastadas(am.historialesTransacciones[k]) <= totalGastadas(am.historialesTransacciones[res]))
-        %ver que onda el caso vacio (cuando recien se inicializa el TAD)
+        (\forall k \in \Z)(k \in am.historialesTransacciones\ \implicaLuego \ millasTotales(am.historialesTransacciones[k])\\ \leq millasTotales(am.historialesTransacciones[res]))
         }
 \end{proc}
 
@@ -341,12 +288,13 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 }{
 \Tipo{Usuario}
 }
-    \requiere{}
+    \requiere{True}
+    %NO se aca si hay que pedir que haya al menos un elemento. No se si el vacio.
     \aseguraLargo{
         res \in am.historialesTransacciones \land \\
-        (\forall k \in $\mathbb{Z}$)(k \in am.historialesTransacciones \yluego millasTotales(am.historialesTransacciones[k]) <= millasTotales(am.historialesTransacciones[res]))
+        (\forall k \in \Z)(k \in am.historialesTransacciones \implicaLuego totalTransferidas(am.historialesTransacciones[k]) \leq totalTransferidas(am.historialesTransacciones[res]))
     }
-    %ver que onda el caso vacio (cuando recien se inicializa el TAD)
+    
 \end{proc}
 
 
@@ -354,58 +302,78 @@ Además, disponen de comandos para cuantificadores: $\paraTodo{x}{\mathbb{Z}}{x 
 {
 \In am:AirMiles,
 }{
-\Tipo{$\seq{\tupla{UsuarioXUsuario}}$}
+\Tipo{\seq{\tupla{UsuarioXUsuario}}}
 }
-    \requiere{}
+    \requiere{True}
     \aseguraLargo{
-        (|am.historialesTransacciones| < 2 \yluego res = $\tupla{()}$) \land \\
-        (\forall i,j \in Z)((i,j \in am.historialesTransacciones \land_l i\neq j \land parejaTransferidores(am.historieslTransacciones,i,j))\yluego (i,j) \in res) \land \\
-        (sinRepetidosNiAnagramas(res))
+        (|am.historialesTransacciones| < 2 \implicaLuego res = \seq{}) \land \\
+        (sinRepetidosNiAnagramas(res) \land \\
+        (\forall i,j \in Z)((i,j \in am.historialesTransacciones\ \yLuego i\neq j\ \land \\ sonParejaTransferidores(am.historieslTransacciones,i,j))\implicaLuego (\tupla{iXj} \in res) 
     }
 \end{proc}
 
-\pred {sinRepetidosNiAnagramas}{listaTuplaUsuarios:\seq{\tupla{UsuarioXUsuario}}}{
-    (\forall i \in Z)(0 \geq i < |listaTuplaUsuarios| \yluego (\forall j \in Z)((i\neq j \land_l 0\geq j <|listaTuplaUsuarios|))\yluego ((listaTuplaUsuarios[i]_0 \neq listaTuplaUsuarios[j]_0 \land listaTuplaUsuarios[i]_1 \neq listaTuplaUsuarios[j]_1) \land (listaTuplaUsuarios[i]_0 \neq listaTuplaUsuarios[j]_1 \land listaTuplaUsuarios[i]_1 \neq listaTuplaUsuarios[j]_0)))
-    }
-
-\aux{millasDisponibles}{hist: Historial}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(esUso(hist[i]_0), -1*hist[i], hist[i])$} 
+\pred{sonParejaTransferidores}{histoTrans: HistorialesTransacciones, usuario1:Usuario,\\ usuario2:Usuario}{\\
+(\forall i \in Z)(0 \leq i < |histoTrans[usuario1]| \yLuego (histoTrans[usuario1][i]_0 = "Transferir"\ \lor \ histoTrans[usuario1][i]_0 = "Recibir")) \implicaLuego (histoTrans[usuario1][i]_2 = usuario2) \land \\
+(\forall j \in Z)(0 \leq j < |histoTrans[usuario2]| \yLuego (histoTrans[usuario2][j]_0 = "Transferir" \lor histoTrans[j]_0 = "Recibir")) \implicaLuego (histoTrans[j]_2 = usuario1)
+}
 \\
-\pred{esUso}{accion:Accion}{ accion \in \ $$\seq{Canjear, Transferir}$$ }
 \\
-\aux{millasTotales}{hist: Historial}{\R}{$\sum_{i=0}^{|hist-1|} \mathsf{IfThenElse}(hist[i]_0 = "Transferir", -1*hist[i], hist[i])$}
+\pred {sinRepetidosNiAnagramas}{listaTuplaUsuarios:\seq{\tupla{UsuarioXUsuario}}}{\\
+    (\forall i,j \in Z)(0 \leq i,j < |listaTuplaUsuarios|\ \yluego \ i\neq j\ \implicaLuego ((listaTuplaUsuarios[i]_0 \neq listaTuplaUsuarios[j]_0 \land listaTuplaUsuarios[i]_1 \neq listaTuplaUsuarios[j]_1) \land \\(listaTuplaUsuarios[i]_0 \neq listaTuplaUsuarios[j]_1 \land \ listaTuplaUsuarios[i]_1 \neq listaTuplaUsuarios[j]_0)))
+}
+\\
+\\
+\aux{millasDisponibles}{hist: HistorialTransaccion}{\R}{$\sum_{i=0}^{|hist-1|}$ fThenElse(esUso(hist[i]_0), -1*hist[i], hist[i])} 
+\\
+\\
+\pred{esUso}{accion:Accion}{ accion \in  \seq{Canjear, Transferir} }
+\\
+\\
+\aux{millasTotales}{hist: Historial}{\R}{\sum_{i=0}^{|hist-1|} IfThenElse(hist[i]_0 = "Transferir", -1*hist[i], hist[i])}
+\\
 \\
 \aux{agregarTransaccion}{historialViejo: Historial,  transaccionNueva :Transaccion}{Historial}{historialViejo ++ <transaccionNueva>} 
 \\
-\aux{añadirUsuario}{baseDeDatos:$\Diccionario{Usuario}{\seq{T}}$, usuario:Usuario}{$\Diccionario{Usuario}{\seq{T}}$}{setKey(baseDeDatos,usuario,\texttt{<>}) }
 \\
-\aux{añadirPromocionSinTope}{baseDeDatos:$\Diccionario{NombrePromocion}{\seq{T}}$, promocion:NombrePromocion, factor:Factor}{$\Diccionario{NombrePromocion}{\seq{T}}$}{setKey(baseDeDatos,promocion,$\tupla{Factor,False,0}$) }
+\aux{añadirUsuario}{baseDeDatos:\Diccionario{Usuario}{\seq{T}}, usuario:Usuario}{\Diccionario{Usuario}{\seq{T}}}{setKey(baseDeDatos,usuario,\texttt{<>}) }
 \\
-\aux{añadirPromocionConTope}{baseDeDatos:$\Diccionario{NombrePromocion}{\seq{T}}$, promocion:NombrePromocion, factor:Factor, tope : MontoTope}{$\Diccionario{NombrePromocion}{\seq{T}}$}{setKey(baseDeDatos,promocion,$\tupla{Factor,True,tope}$) }
 \\
-\aux{eliminarPromocion}{baseDeDatos:$\Diccionario{NombrePromocion}{\seq{T}}$, promocion:NombrePromocion}{$\Diccionario{NombrePromocion}{\seq{T}}$}{delKey(baseDeDatos,promocion)}
+\aux{añadirPromocionSinTope}{baseDeDatos:\Diccionario{NombrePromocion}{\seq{T}}, promocion:NombrePromocion, factor:Factor}{\Diccionario{NombrePromocion}{\seq{T}}}{\\setKey(baseDeDatos,promocion,\tupla{Factor,False,0}) }
 \\
-\pred{igualesSalvoUsuario}{dictControl : $\Diccionario{Usuario}{\seq{T}}$ , dictAlterado : $\Diccionario{Usuario}{\seq{T}}$ , usuariosModificado: $\seq{usuario}$}{(\forall k : \Z) (k \in dictControl \ \yLuego \ k \neq usuariosModificado))\implicaLuego (dictControl[k] = dictAlterado[k]) }
 \\
-\pred{igualesSalvoUsuarioIdaVuelta}{dict1 : $\Diccionario{Usuario}{\seq{T}}$ , dict2 : $\Diccionario{Usuario}{\seq{T}}$ , usuariosModificado: $\seq{usuario}$}{
+\aux{añadirPromocionConTope}{baseDeDatos:\Diccionario{NombrePromocion}{\seq{T}}, promocion:NombrePromocion, factor:Factor, tope : MontoTope}{\Diccionario{NombrePromocion}{\seq{T}}}{setKey(baseDeDatos,promocion,\tupla{Factor,True,tope}) }
+\\
+\\
+\aux{eliminarPromocion}{baseDeDatos:\Diccionario{NombrePromocion}{\seq{T}}, promocion:NombrePromocion}{\Diccionario{NombrePromocion}{\seq{T}}}{delKey(baseDeDatos,promocion)}
+\\
+\\
+\pred{igualesSalvoUsuario}{dictControl : \Diccionario{Usuario}{\seq{T}} , dictAlterado : \Diccionario{Usuario}{\seq{T}} , usuariosModificado: \seq{usuario}}{(\forall k : \Z) (k \in dictControl \ \yLuego \ k \neq usuariosModificado))\implicaLuego (dictControl[k] = dictAlterado[k]) }
+\\
+\\
+\pred{igualesSalvoUsuarioIdaVuelta}{dict1 : \Diccionario{Usuario}{\seq{T}} , dict2 : \Diccionario{Usuario}{\seq{T}} , usuariosModificado: \seq{usuario}}{
+%Aca podriamos usar doble iguales SalvoUsuario, quizas es mas declarativo / les guste mas a los profes
 (\forall k : \Z) (k \in dict1 \ \yLuego \ k \neq usuariosModificado))\implicaLuego (dict1[k] = dict2[k]) \land \\
 (\forall q : \Z) (k \in dict2 \ \yLuego \ q \neq usuariosModificado))\implicaLuego (dict1[q] = dict2[q])
 }
 \\
+\\
 \aux{acumuladoPorViajes}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 ="Acumular",historial[i]_1,0)}
 \\
-\aux{totalCanjeadas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 ="Canjear",historial[i]_1,0)}
 \\
-\aux{totalGastadas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 \in $\seq{"Canjear","Transferir"}$,historial[i]_1,0)}
+\aux{totalCanjeadas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ \\ifThenElse(historial[i]_0 ="Canjear",historial[i]_1,0)}
 \\
-\aux{totalTransferidas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ ifThenElse(historial[i]_0 \in \seq{"Transferir","Recibir"},historial[i]_1,0)}
 \\
-\aux{rankingMillasDisponibles}{historial:HistorialTransaccion, usuario:Usuario}{$\mathbb{Z}$}{ |historial| + 1 - $\sum_{\forall k \in historial} ifThenElse(historial[k] <= historial[usuario],1,0)$}
+\aux{totalGastadas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ \\ifThenElse(historial[i]_0 \in \seq{"Canjear","Transferir"},historial[i]_1,0)}
 \\
+\\
+\aux{totalTransferidas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ \\ifThenElse(historial[i]_0 \in \seq{"Transferir","Recibir"},historial[i]_1,0)}
+\\
+\\
+\aux{rankingMillasDisponibles}{historial:HistorialTransacciones, usuario:Usuario}{\Z}{ |historial| + 1 - \\$\sum_{\forall k \in historial}$ ifThenElse(millasDisponibles(historial[k]) \leq millasDisponibles(historial[usuario]),1,0)}
+
+
 
 \end{tad}
-
-
-\end{document}
 
 
 \end{document}
