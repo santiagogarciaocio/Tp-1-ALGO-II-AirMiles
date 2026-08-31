@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage[left=2.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage[left=0.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
 \usepackage{macros/AEDLogica, macros/AEDEspecificacion, macros/AEDTADs}
 \usepackage{caratula}
 
@@ -12,9 +12,10 @@
 \fecha{\today}
 
 \materia{Algoritmos y Estructuras de Datos}
-\grupo{Nombre del grupo} 
+\grupo{Grupo 1} 
 
 \integrante{Garcia Ocio, Santiago}{1210/25}{santiagogarciaocio@gmail.com}
+\integrante{Seda, Manuel} {631/18}{manu.seda@hotmail.com}
 % \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
 
 
@@ -39,7 +40,8 @@
 
 \begin{itemize}
     \item[]NombrePromocion ES String
-    \item[]PromocionesActivas ES $\seq{\tupla{Factor X tieneTope X montoTope}}$
+    \item[]PromocionActiva ES $\tupla{Factor, tieneTope, montoTope}$
+    \item[]PromocionesActivas ES $\seq{PromocionActiva}$
     \item[]Factor ES $\mathbb{R}$ 
     \item[]TieneTope ES Bool
     \item[]MontoTope ES $\mathbb{Z}$    
@@ -51,7 +53,7 @@
     \item[]Transaccion ES $\tupla{Accion X Millas X Comentario}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\ 
     \item[]Comentario es String 
-    \item[]Millas ES $\mathbb{Z}$     
+    \item[]Millas ES $\mathbb{R}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     
 \end{itemize}
@@ -64,7 +66,7 @@
 \\
 \obs{historialesTransacciones}{\Diccionario{Usuario}{HistorialTransaccion} }
 \\
-\obs{promociones}{\Diccionario{NombrePromocion}{PromocionesActivas}}
+\obs{promociones}{\Diccionario{NombrePromocion}{PromocionActiva}}
 \\
 
 
@@ -104,13 +106,13 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historialesTransacciones \land\\
     usuarioReferido \notin AM_0.historialesTransacciones} 
     \aseguraLargo{  
-        am.historialesTransacciones[usuarioReferidor] = agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],("Refiridor",500,"Referido"))\land \\
-        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones,\seq{usuarioReferidor}) \land \\  
+         am.historialesTransacciones[usuarioReferidor] =\\ agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],\\("Refiridor",500,"Referido"))\\\land  \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones,  am.historialesTransacciones,\\\seq{usuarioReferidor}) \land \\  
         |AM_0.historialesTransacciones|+1 = |am.historialesTransacciones| \land \\        
         am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuario) \land \\
-        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, \seq{usuarioReferidor}) \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, \seq{usuarioReferidor})\\ \land 
         |AM_0.historialesVuelos|+1 = |am.historialesVuelos| \land \\        
-        am.promociones = AM_0.promociones
+        am.promociones = AM_0.promociones 
                     }
 \end{proc}
 
