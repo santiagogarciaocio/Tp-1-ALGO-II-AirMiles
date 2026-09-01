@@ -40,7 +40,7 @@
 
 \begin{itemize}
     \item[]NombrePromocion ES String
-    \item[]PromocionActiva ES $\tupla{Factor, tieneTope, montoTope}$
+    \item[]PromocionActiva ES $\tupla{Factor, tieneTope, montoTope, millasAcumuladas}$
     \item[]PromocionesActivas ES $\seq{PromocionActiva}$
     \item[]Factor ES $\mathbb{R}$ 
     \item[]TieneTope ES Bool
@@ -124,12 +124,14 @@
 \In promocion: NombrePromocion
 }{}
     \requiere{am=AM_0\  \land \ usuario \in AM_0.historiales\  \land \ promocion \in AM_0.promociones\  \land \ distancia>0}
-    \aseguraLargo{am.promociones = AM_0.promociones \land \\
+    \aseguraLargo{todasPromocionesIgualesSalvoUna(am, AM_0, promocion) \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuario}$) \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, $\seq{usuario}$) \land \\
-        am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones,$\seq{\tupla{"Acumular",millasVuelo(distancia,categoria,facto)}}$ \land \\
-        am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario], 
-        %me doy por vencido por el momento con esta
+        (esPromocionConTope(am, promocion) \land promocionPasaTope(am, usuario, distancia, promocion) \implies am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones[usuario],\\("Acumular",millasVuelo(am, usuario, distancia, "NoPromo"))) \land am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario], (distancia, millasVuelo(am, usuario, distancia, "NoPromo"),\\ "NoPromo", 1))) \land 
+
+        (esPromocionConTope(am, promocion) \land \lnot promocionPasaTope(am, usuario, distancia, promocion) \implies (am.promociones[promocion]_3 = am.promociones[promocion]_3 + millasVuelo(am, usuario, distancia, promocion)) \land am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones[usuario],\\("Acumular",millasVuelo(am, usuario, distancia, promocion))) \land am.historialesVuelos[usuario] = \\agregarElemento(AM_0.historialesVuelos[usuario], (distancia, millasVuelo(am, usuario, distancia, promocion),\\ promocion, factorDePromocion(promocion)))) \land
+
+        (\lnot esPromocionConTope(am, promocion) \implies am.historialesTransacciones[usuario] = \\agregarElemento(AM_0.historialesTransacciones[usuario],("Acumular",millasVuelo(am, usuario, distancia,\\ promocion))) \land am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario],\\ (distancia, millasVuelo(am, usuario, distancia, promocion), promocion, factorDePromocion(promocion))))
         
     }
 \end{proc}
@@ -371,7 +373,20 @@
 \aux{totalTransferidas}{historial:historialesTransaccion}{Millas}{$\sum_{i=0}^{|historial|-1}$ \\ifThenElse(historial[i]_0 \in \seq{"Transferir","Recibir"},historial[i]_1,0)}
 \\
 \\
-\aux{rankingMillasDisponibles}{historial:HistorialTransacciones, usuario:Usuario}{\Z}{ |historial| + 1 - \\$\sum_{\forall k \in historial}$ ifThenElse(millasDisponibles(historial[k]) \leq millasDisponibles(historial[usuario]),1,0)}
+\aux{rankingMillasDisponibles}{historial:HistorialTransacciones, usuario:Usuario}{\Z}{ |historial| + 1 - \\$\sum_{\forall k \in historial}$ ifThenElse(millasDisponibles(historial[k]) \leq millasDisponibles(historial[usuario]),1,0)
+\\
+\\
+\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}
+{am.promociones[promocion]_1 = True}
+\\
+\\
+\pred{promocionPasaTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{millasVuelo(am, usuario, distancia, promocion) + am.promociones[promocion]_3 > am.promociones[promocion]_2}
+\\
+\\
+\aux{agregarVuelo}{am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{AirMiles} = Agregar
+% no sé bien cómo escribir esto
+
+}
 
 
 
