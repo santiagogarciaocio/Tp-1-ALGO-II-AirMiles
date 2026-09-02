@@ -124,14 +124,14 @@
 \In promocion: NombrePromocion
 }{}
     \requiere{am=AM_0\  \land \ usuario \in AM_0.historiales\  \land \ promocion \in AM_0.promociones\  \land \ distancia>0}
-    \aseguraLargo{todasPromocionesIgualesSalvoUna(am, AM_0, promocion) \land \\
+    \aseguraLargo{todasPromocionesIgualesSalvoUna(AM_0, am, promocion) \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuario}$) \land \\
         igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, $\seq{usuario}$) \land \\
-        (esPromocionConTope(am, promocion) \land promocionPasaTope(am, usuario, distancia, promocion) \implies am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones[usuario],\\("Acumular",millasVuelo(am, usuario, distancia, "NoPromo"))) \land am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario], (distancia, millasVuelo(am, usuario, distancia, "NoPromo"),\\ "NoPromo", 1))) \land 
+        (esPromocionConTope(am, promocion) \land promocionPasaTope(am, usuario, distancia, promocion) \implies historialiesActualizados(AM_0, am, usuario, distancia, "NoPromo") \land eliminarPromocion(am, promocion)) \land 
 
-        (esPromocionConTope(am, promocion) \land \lnot promocionPasaTope(am, usuario, distancia, promocion) \implies (am.promociones[promocion]_3 = am.promociones[promocion]_3 + millasVuelo(am, usuario, distancia, promocion)) \land am.historialesTransacciones[usuario] = agregarElemento(AM_0.historialesTransacciones[usuario],\\("Acumular",millasVuelo(am, usuario, distancia, promocion))) \land am.historialesVuelos[usuario] = \\agregarElemento(AM_0.historialesVuelos[usuario], (distancia, millasVuelo(am, usuario, distancia, promocion),\\ promocion, factorDePromocion(promocion)))) \land
+        (esPromocionConTope(am, promocion) \land \lnot promocionPasaTope(am, usuario, distancia, promocion) \implies aPromocionSeSumanMillas(AM_0, am, usuario, distancia, promocion) \land \\historialesActualizados(AM_0, am, usuario, distancia, promocion)) \land
 
-        (\lnot esPromocionConTope(am, promocion) \implies am.historialesTransacciones[usuario] = \\agregarElemento(AM_0.historialesTransacciones[usuario],("Acumular",millasVuelo(am, usuario, distancia,\\ promocion))) \land am.historialesVuelos[usuario] = agregarElemento(AM_0.historialesVuelos[usuario],\\ (distancia, millasVuelo(am, usuario, distancia, promocion), promocion, factorDePromocion(promocion))))
+        (\lnot esPromocionConTope(am, promocion) \implies historialesActualizados(AM_0, am, usuario, distancia, promocion))
         
     }
 \end{proc}
@@ -336,7 +336,7 @@
 \aux{millasTotales}{hist: Historial}{\R}{\sum_{i=0}^{|hist-1|} IfThenElse(hist[i]_0 = "Transferir", -1*hist[i], hist[i])}
 \\
 \\
-\aux{agregarTransaccion}{historialViejo: Historial,  transaccionNueva :Transaccion}{Historial}{historialViejo ++ <transaccionNueva>} 
+\aux{agregarTransaccion}{historialViejo: HistorialTransaccion,  transaccionNueva :Transaccion}{HistorialTransaccion}{historialViejo ++ <transaccionNueva>} 
 \\
 \\
 \aux{añadirUsuario}{baseDeDatos:\Diccionario{Usuario}{\seq{T}}, usuario:Usuario}{\Diccionario{Usuario}{\seq{T}}}{setKey(baseDeDatos,usuario,\texttt{<>}) }
@@ -383,9 +383,23 @@
 \pred{promocionPasaTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{millasVuelo(am, usuario, distancia, promocion) + am.promociones[promocion]_3 > am.promociones[promocion]_2}
 \\
 \\
-\aux{agregarVuelo}{am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{AirMiles} = Agregar
-% no sé bien cómo escribir esto
-
+\aux{agregarVuelo}{historialViejo : HistorialVuelo, distancia : Distancia, millas : Millas, promocion : NombrePromocion, factor : Factor, usuario : Usuario}{HistorialVuelo}{historialViejo ++ <(distancia, millasVuelo(historialViejo, usuario, distancia, promocion), promocion, factor)>
+}
+\\
+\\
+\pred{historialTransaccionesActualizado}{AM_0: AirMiles, am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{am.historialesTransacciones[usuario] = agregarTransaccion(AM_0, ("Acumular", millasVuelo(AM_0, usuario, distancia, promocion)))}
+\\
+\\
+\pred{historialVuelosActualizado}{AM_0 : AirMiles, am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{am.historialesVuelos[usuario] = agregarVuelo(AM_0, distancia, millasVuelo(AM_0, usuario, distancia, promocion), promocion, factor)}
+\\
+\\
+\pred{historialesActualizados}{AM_0 : AirMiles, am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{historialTransaccionesActualizado(AM_0, am, usuario, distancia, promocion) \land historialVuelosActualizado(AM_0, am, usuario, distancia, promocion)}
+\\
+\\
+\pred{todasPromocionesIgualesSalvoUna}{AM_0 : AirMiles, am : AirMiles, promocion : NombrePromocion}{(\forall p : NombrePromocion)(p \neq promocion \implies (p \in am \iff p \in AM_0) \land AM_0[p] = am[p])}
+\\
+\\
+\pred{aPromocionSeSumanMillas}{AM_0 : AirMiles, am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{am.promociones[promocion]_3 = AM_0.promociones[promocion]_3 + millasVuelo(AM_0, usuario, distancia, promocion)}
 }
 
 
