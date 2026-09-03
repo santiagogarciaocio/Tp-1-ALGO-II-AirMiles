@@ -76,7 +76,7 @@
 }
     \requiere{True}
     \aseguraLargo{
-        res.promociones =  <"NoPromo":(1,False,0)>  \land \\
+        res.promociones =  <"NoPromo":(1,False,0,0)>  \land \\
         res.historialesVuelos = <> \land \\
         res.historialesTransacciones = <> 
         }
@@ -106,10 +106,10 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historialesTransacciones \land\\
     usuarioReferido \notin AM_0.historialesTransacciones} 
     \aseguraLargo{  
-         am.historialesTransacciones[usuarioReferidor] =\\ agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],\\("Refiridor",500,"Referido"))\\\land  \\
+         am.historialesTransacciones[usuarioReferidor] =\\ agregarTransaccion(AM_0.historialesTransacciones[usuarioReferidor],\\("Referidor",500))\\\land  \\
         igualesSalvoUsuariosIdaVuelta(AM_0.historialesTransacciones,  am.historialesTransacciones,\\\seq{usuarioReferidor, usuarioReferido}) \land \\  
         (usuarioReferido \in historialesTransacciones \yLuego 
-        am.historialesTransacciones[usuarioReferido] =\\ \seq{("Referido", 500, "")})
+        am.historialesTransacciones[usuarioReferido] =\\ \seq{("Referido", 500)})
          \land \\        
         am.historialesVuelos = añadirUsuario(AM_0.historialesVuelos,usuarioReferido) \land \\    
         am.promociones = AM_0.promociones 
@@ -125,8 +125,8 @@
 }{}
     \requiere{am=AM_0\  \land \ usuario \in AM_0.historiales\  \land \ promocion \in AM_0.promociones\  \land \ distancia>0}
     \aseguraLargo{todasPromocionesIgualesSalvoUna(AM_0, am, promocion) \land \\
-        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, $\seq{usuario}$) \land \\
-        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, $\seq{usuario}$) \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesVuelos, am.historialesVuelos, \seq{usuario}) \land \\
+        igualesSalvoUsuarioIdaVuelta(AM_0.historialesTransacciones, am.historialesTransacciones, \seq{usuario}) \land \\
         (esPromocionConTope(am, promocion) \land promocionPasaTope(am, usuario, distancia, promocion) \implies historialiesActualizados(AM_0, am, usuario, distancia, "NoPromo") \land eliminarPromocion(am, promocion)) \land 
 
         (esPromocionConTope(am, promocion) \land \lnot promocionPasaTope(am, usuario, distancia, promocion) \implies aPromocionSeSumanMillas(AM_0, am, usuario, distancia, promocion) \land \\historialesActualizados(AM_0, am, usuario, distancia, promocion)) \land
@@ -327,7 +327,7 @@
 }
 \\
 \\
-\aux{millasDisponibles}{hist: HistorialTransaccion}{\R}{$\sum_{i=0}^{|hist-1|}$ fThenElse(esUso(hist[i]_0), -1*hist[i], hist[i])} 
+\aux{millasDisponibles}{hist: HistorialTransaccion}{\R}{$\sum_{i=0}^{|hist-1|}$ fThenElse(esUso(hist[i]_0), -1*hist[i]_1, hist[i]_1)} 
 \\
 \\
 \pred{esUso}{accion:Accion}{ accion \in  \seq{Canjear, Transferir} }
