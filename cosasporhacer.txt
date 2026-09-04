@@ -1,8 +1,9 @@
 obs PROMOS (NO CONTAR CUANTAS VAN,. IR RESTANDO AL TOPE) 
 
 acumularmilla
-  cambiar el queruier ( promoion sin ope OR_l  millas de vuela <= tope promocion) 
+  cambiar el queruier ( promoion sin ope OR_l  ((esOro() ->'_l' cuentaMilla()  > tope promocion INT esBronce... ) )) 
   asegura (CAMBIAR TOPE (RESTAR, O AGREGAR)
+          si promo tiene tope y llega a cero por millas ENTONCES eliminar promo
 
 AGREGAR PRED ESorO....
 
@@ -11,10 +12,10 @@ proc acumullarMillas()
 {
     requier
     asegura{                                                     
-         esOro(storialesTransacciones, usuario) -> am.historialesTransacciones = setKey(AM0.historialesTransacciones,usuario,AM0.historialesTransacciones[usuario]++<('Acumular',CuentadeMilla(),'')>)
-%am.historialesTransacciones[usuario])()(() = AM0.historialesTransacciones{usaurio] (distancia*1*factorpromocion) OR
-          esPlatino(storialesTransacciones, usuario) -> distancia*0*factorpromocion) OR
-        esBronce(storialesTransacciones, usuario) -> distancia*1.5*factorpromocion) OR
+         esOro(storialesTransacciones, usuario) -> am.historialesTransacciones = setKey(AM0.historialesTransacciones,usuario,AM0.historialesTransacciones[usuario]++<('Acumular',CuentadeMilla(),'')>) INT
+%am.historialesTransacciones[usuario])()(() = AM0.historialesTransacciones{usaurio] (distancia*1*factorpromocion) INT
+          esPlatino(storialesTransacciones, usuario) -> distancia*0*factorpromocion) INT
+        esBronce(storialesTransacciones, usuario) -> distancia*1.5*factorpromocion) INT
 }
 }
 
