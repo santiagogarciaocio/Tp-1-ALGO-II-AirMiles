@@ -294,7 +294,7 @@
     %NO se aca si hay que pedir que haya al menos un elemento. No se si el vacio.
     \aseguraLargo{
         res \in am.historialesTransacciones \land \\
-        (\forall k \in \Z)(k \in am.historialesTransacciones \implicaLuego totalTransferidas(am.historialesTransacciones[k]) \leq totalTransferidas(am.historialesTransacciones[res]))
+        (\forall k \in \Z)(k \in am.historialesTransacciones \implicaLuego totalGastadas(am.historialesTransacciones[k]) \leq totalGastadas(am.historialesTransacciones[res]))
     }
     
 \end{proc}
