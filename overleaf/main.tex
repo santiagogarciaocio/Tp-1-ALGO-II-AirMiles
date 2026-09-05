@@ -275,7 +275,10 @@
 }
     \requiere{n > 0}
     \aseguraLargo{
-        (|am.historiales|<n \implies |res| = |am.historiales|) \land \\(|am.historiales|\geq n \implies |res| = n) \land \\ ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
+        (|am.historiales|<n \implies |res| = |am.historiales|) \land \\
+        %Aca no deberia ser (|am.historiales|<n \implies res = claves(am.historiales)). Porque lo que queremos es que nos devuelva todos lo usuarios del sistema
+        (|am.historiales|\geq n \implies |res| = n) \land \\ ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
+        %Esta bien ¿\ u\in res? siempre lo vi como 0 <= i < |res| ->_l res[i] \in am.historiales
         ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].Transacciones) \geq millasDisponibles(am.historiales[res[i+1]].Transacciones)) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land \\millasDisponibles(am.historiales[u].Transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].Transacciones))                       
     }
 \end{proc}
@@ -397,7 +400,7 @@
 }
 \\
 \\
-\aux{millasDisponibles}{hist: HistorialTransaccion}{\R}{$\sum_{i=0}^{|hist-1|}$ fThenElse(esUso(hist[i]_0), -1*hist[i]_1, hist[i]_1)} 
+\aux{millasDisponibles}{hist: HistorialTransaccion}{\R}{$\sum_{i=0}^{|hist-1|}$ fThenElse(esUso(millasSinCanjeo(hist[i]_0)), -1*hist[i]_1, hist[i]_1)} 
 \\
 \\
 \pred{esUso}{accion:Accion}{ accion \in  \seq{Canjear, Transferir} }
@@ -468,6 +471,9 @@
 \\
 \pred{aPromocionSeSumanMillas}{AM_0 : AirMiles, am : AirMiles, usuario : Usuario, distancia : Distancia, promocion : NombrePromocion}{am.promociones[promocion]_3 = AM_0.promociones[promocion]_3 + millasVuelo(AM_0, usuario, distancia, promocion)}
 }
+\\
+\\
+\pred{millasSinCanjeo}{histTrans:Transacciones}{(\forall i : \Z)(histTrans[i]_0 \neq "Canjear")}
 
 
 
