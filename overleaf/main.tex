@@ -381,7 +381,8 @@
     \aseguraLargo{
         (|am.historialesTransacciones| < 2 \implicaLuego res = \seq{}) \land \\
         (sinRepetidosNiAnagramas(res) \land \\
-        (\forall i,j \in Z)((i,j \in am.historialesTransacciones\ \yLuego i\neq j\ \land \\ sonParejaTransferidores(am.historieslTransacciones,i,j))\implicaLuego (\tupla{iXj} \in res) 
+        (\forall i,j \in Z)((i,j \in am.historialesTransacciones\ \yLuego i\neq j\ \land \\ sonParejaTransferidores(am.historieslTransacciones,i,j))\implicaLuego (\tupla{iXj} \in res) \land \\ 
+        (\forall k : Z)(0\leq k < |res| \implicaLuego sonParejaTransferidos(am.historial.transacciones,res[k]_0,res[k]_1))
     }
 \end{proc}
 
