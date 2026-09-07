@@ -397,7 +397,7 @@
 \\
 \\
 \pred {sinRepetidosNiAnagramas}{seqTuplUsu:\seq{\tupla{UsuarioXUsuario}}}{\\
-    (\forall i,j \in Z)(0 \leq i,j < |seqTuplUsu|\ \yluego \ i\neq j\ \implicaLuego ((seqTuplUsu[i]_0 \neq seqTuplUsu[j]_0 \land seqTuplUsu[i]_1 \neq seqTuplUsu[j]_1) \land \\(seqTuplUsu[i]_0 \neq seqTuplUsu[j]_1 \land \ seqTuplUsu[i]_1 \neq seqTuplUsu[j]_0)))
+    (\forall i,j \in Z)(0 \leq i,j < |seqTuplUsu|\ \land \ i\neq j\ \implicaLuego ((seqTuplUsu[i]_0 \neq seqTuplUsu[j]_0 \land seqTuplUsu[i]_1 \neq seqTuplUsu[j]_1) \land \\(seqTuplUsu[i]_0 \neq seqTuplUsu[j]_1 \land \ seqTuplUsu[i]_1 \neq seqTuplUsu[j]_0)))
 }
 \\
 \\
@@ -416,7 +416,7 @@
 \\
 \\
 \aux{historialIndividualModificado}{hist:Historiales,u:Usuario,accion:Accion,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
-            \\struct<hist[u].transacciones++\seq{accion,d*f*cat,""},hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}}, hist[u].transferencias>
+            \\struct<hist[u].transacciones++\seq{accion,d*f*cat,""},hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}},\\ hist[u].transferencias>
 }
 \\
 \\
