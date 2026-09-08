@@ -210,7 +210,7 @@
         %Aca no deberia ser (|am.historiales|<n \implies res = claves(am.historiales)). Porque lo que queremos es que nos devuelva todos lo usuarios del sistema
         (|am.historiales|\geq n \implies |res| = n) \land \\ ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
         %Esta bien ¿\ u\in res? siempre lo vi como 0 <= i < |res| ->_l res[i] \in am.historiales
-        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
+        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \implicaLuego \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
     }
 \end{proc}
 
