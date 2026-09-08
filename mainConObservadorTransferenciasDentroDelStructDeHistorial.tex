@@ -140,7 +140,7 @@
 \In usuario:Usuario,
 \In millas:Millas
 }{}
-    \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(millasSinCanjeo(AM_0.historiales[usuario].transacciones))}
+    \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(AM_0.historiales[usuario].transacciones)}
     \aseguraLargo{
         am.promociones = AM_0.promociones \land \\
         igualSalvo(am,AM_0,\tupla{usuario}) \land \\
@@ -158,7 +158,7 @@
 \In receptor : Usuario,\\
 \In millas : Millas
 }{}    
-    \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(millasSinCanjeo(AM_0.historiales[dador].transacciones)) \geq millas}
+    \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(AM_0.historiales[dador].transacciones) \geq millas}
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
                 igualesSalvo(am,AM_0,\seq{dador,receptor} \land \\
                 am.historial[dador].vuelos = AM_0.historial[dador].vuelos \land \\
@@ -180,7 +180,7 @@
 \Tipo{Millas}
 }
     \requiere{usuario \in am.historial}
-    \aseguraLargo{res = millasDisponibles(millasSinCanjeo(am.historial[usuario].transacciones))}
+    \aseguraLargo{res = millasDisponibles(am.historial[usuario].transacciones)}
 \end{proc}
 
 \begin{proc}{consultarCategoria}{
@@ -210,7 +210,7 @@
         %Aca no deberia ser (|am.historiales|<n \implies res = claves(am.historiales)). Porque lo que queremos es que nos devuelva todos lo usuarios del sistema
         (|am.historiales|\geq n \implies |res| = n) \land \\ ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
         %Esta bien ¿\ u\in res? siempre lo vi como 0 <= i < |res| ->_l res[i] \in am.historiales
-        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(millasSinCanjeo(am.historiales[res[i]].transacciones)) \geq millasDisponibles(millasSinCanjeo(am.historiales[res[i+1]].transacciones)) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land \\millasDisponibles(millasSinCanjeo(am.historiales[u].transacciones)) > \\millasDisponibles(millasSinCanjeo(am.historiales[res[|res|-1]].transacciones)))                       
+        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
     }
 \end{proc}
 
@@ -389,9 +389,6 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \aux{historialIndividualModificado}{hist:Historiales,u:Usuario,accion:Accion,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
             \\struct<hist[u].transacciones++\seq{accion,d*f*cat,""},hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}},\\ hist[u].transferencias>
 }
-\\
-\\
-\aux{millasSinCanjeo}{histTrans:Transacciones}{(\forall i : \Z)(histTrans[i]_0 \neq "Canjear")}
 \\
 \\
 \aux{millasDisponibles}{trans: Transacciones}{\R}{$\sum_{i=0}^{|trans-1|}$ ifThenElse(esUso(trans[i]_0)), -1*hist[i]_1, hist[i]_1)} 
