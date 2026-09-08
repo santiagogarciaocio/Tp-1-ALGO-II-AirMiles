@@ -106,12 +106,12 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
-    am.historiales[usuarioReferido].transacciones = <\tupla{"Referido"X500}> \land \\
+    am.historiales[usuarioReferido].transacciones = <\tupla{"Referido",500}> \land \\
     am.historiales[usuarioReferido].vuelos = <> \land \\
     am.historiales[usuarioReferido].transferencias = <> \land \\
-    am.historiales[usuarioReferidor].transacciones = AM_0.historiales[usuarioReferidor].transacciones ++ \seq{\tupla{"Referidor",500}} \land \\
+    am.historiales[usuarioReferidor].transacciones = \\ AM_0.historiales[usuarioReferidor].transacciones ++ \seq{\tupla{"Referidor",500}} \land \\
     am.historiales[usuarioReferidor].vuelos = AM_0.historiales[usuarioReferidor].vuelos \land \\
-    am.historiales[usuarioReferidor].transferencias = AM_0.historiales[usuarioReferidor].transferencias \land \\
+    am.historiales[usuarioReferidor].transferencias = \\ AM_0.historiales[usuarioReferidor].transferencias \land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
                     }
 \end{proc}
@@ -144,7 +144,7 @@
     \aseguraLargo{
         am.promociones = AM_0.promociones \land \\
         igualSalvo(am,AM_0,\tupla{usuario}) \land \\
-        am.historial[usuario].transacciones = AM_0.historial[usuario].transacciones ++ \seq{\tupla{"Canjear",millas}} \land \\
+        am.historial[usuario].transacciones = \\ AM_0.historial[usuario].transacciones ++ \seq{\tupla{"Canjear",millas}} \land \\
         am.historial[usuario].viajes = AM_0.historial[usuario].viajes \land \\
         am.historial[usuario].transferencias = AM_0.historial[usuario].transferencias        
                 }
@@ -162,10 +162,10 @@
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
                 igualesSalvo(am,AM_0,\seq{dador,receptor} \land \\
                 am.historial[dador].vuelos = AM_0.historial[dador].vuelos \land \\
-                am.historial[dador].transacciones = AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
-                am.historial[dador].transferencias = AM_0.historial[dador].transferencias ++ \seq{receptor} \land \\
+                am.historial[dador].transacciones = \\ AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
+                am.historial[dador].transferencias = AM_0.historial[dador].transferencias ++ \seq{receptor} \land 
                 am.historial[receptor].vuelos = AM_0.historial[receptor].vuelos \land \\
-                am.historial[receptor].transacciones = AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
+                am.historial[receptor].transacciones = \\ AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
                 am.historial[receptor].transferencias = AM_0.historial[receptor].transferencias ++ \seq{dador}
                 
                     }  
@@ -190,10 +190,10 @@
 \Tipo{Categoria}
 }
     \requiere{usuario \in am.historial}
-    \aseguraLargo{(res = "Bronces" \iff totalDeMillas(am.historial[usuario].transacciones) < 10.000) \land \\
-            (res = "Plata" \iff (totalDeMillas(am.historial[usuario].transacciones) \geq 10.000 \land totalDeMillas(am.historial[usuario].transacciones) < 50.000) \land \\
-            (res = "Oro" \iff (totalDeMillas(am.historial[usuario].transacciones) \geq 50.000 \land totalDeMillas(am.historial[usuario].transacciones) < 1.000.000) \land \\
-            (res = "Platino" \iff totalDeMillas(am.historial[usuario].transacciones) \geq 1.000.000) \\
+    \aseguraLargo{(res = "Bronce" \iff millasTotales(am.historial[usuario].transacciones) < 10.000) \land \\
+            (res = "Plata" \iff millasTotales(am.historial[usuario].transacciones) \geq 10.000 \land millasTotales(am.historial[usuario].transacciones) < 50.000) \land \\
+            (res = "Oro" \iff millasTotales(am.historial[usuario].transacciones) \geq 50.000 \land millasTotales(am.historial[usuario].transacciones) < 1.000.000) \land \\
+            (res = "Platino" \iff millasTotales(am.historial[usuario].transacciones) \geq 1.000.000) \\
             }
 \end{proc}
 
@@ -210,7 +210,7 @@
         %Aca no deberia ser (|am.historiales|<n \implies res = claves(am.historiales)). Porque lo que queremos es que nos devuelva todos lo usuarios del sistema
         (|am.historiales|\geq n \implies |res| = n) \land \\ ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
         %Esta bien ¿\ u\in res? siempre lo vi como 0 <= i < |res| ->_l res[i] \in am.historiales
-        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \implicaLuego \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
+        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land_L \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
     }
 \end{proc}
 
@@ -223,7 +223,7 @@
 \In am:AirMiles,
 \In usuario:Usuario
 }{
-\Tipo{\tupla{MillasXMillasXMillas}}
+\Tipo{\tupla{Millas, Millas, Millas}}
 }
     \requiere{usuario \in am.historiales}
     \aseguraLargo{res_0 = acumuladoPorViajes(am.historiales[usuario].transacciones) \land \\
@@ -240,7 +240,7 @@
 }{}
     \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promociones}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factorXFalseX0})       
+        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,False,0})       
         }
 \end{proc}
 
@@ -254,7 +254,7 @@
 }{}
     \requiere{am=AM_0 \land factor >= 1 \land nombrePromocion \notin AM_0.promociones}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factorXTrueXmontoTope})
+        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,True,montoTope})
     }
 \end{proc}
 
@@ -278,7 +278,6 @@
 \Tipo{Usuario}
 }
     \requiere{|am.historial|>0}
-    %no se si esta bie npedir no vacio o si deberia tener que aceptar el vacio y devolver nada
     \aseguraLargo{
         res \in am.historiales \land \\
         (\forall k \in \Z)(k \in am.historiales \implicaLuego \ millasTotales(am.historiales[k].transacciones)\\ \leq millasTotales(am.historiales[res].transacciones))
@@ -293,7 +292,6 @@
 \Tipo{Usuario}
 }
     \requiere{|am.historial|>0}
-    %NO se aca si hay que pedir que haya al menos un elemento. No se si el vacio.
     \aseguraLargo{
         res \in am.historiales \land \\
         (\forall k \in \Z)(k \in am.historialesTransacciones \implicaLuego totalGastadas(am.historiales[k].transacciones) \leq totalGastadas(am.historiales[res].transacciones))
@@ -306,7 +304,7 @@
 {
 \In am:AirMiles,
 }{
-\Tipo{\seq{\tupla{UsuarioXUsuario}}}
+\Tipo{\seq{\tupla{Usuario,Usuario}}}
 }
     \requiere{True}
     \aseguraLargo{
@@ -329,10 +327,10 @@
 }
 \\
 \\
-\pred{esPromocionSinTope}{am : AirMiles, promocion : NombrePromocion}{am.promociones[promocion]_1 = False}
+\pred{esPromocionSinTope}{am : AirMiles, promocion : NombrePromocion}{ \\ am.promociones[promocion]_1 = False}
 \\
 \\
-\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{am.promociones[promocion]_1 = True}
+\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{ \\ am.promociones[promocion]_1 = True}
 \\
 \\
 \pred{esBronce}{trans:Transacciones}{millasTotales(trans) < 10.000}
