@@ -125,22 +125,11 @@
 \In promocion: NombrePromocion
 }{}
     \requiere{am = AM_0 \land usuario \in AM_0.historiales \land promocion \in AM_0.promociones \land \\
-                (promocionSinTope(AM_0.promociones, promocion)\lor \\(esBronce(millasTotales(AM_0.historiales[usuario].transacciones))\implies \\
-                cantidadMillasAGanar(distancia,factorPromo(AM_0.promociones,promocion),1) \leq \\ millasDisponiblesEnPromo(AM_0.promociones,promocion)) \land \\ 
-                esPlata(millasTotales(AM_0.historiales[usuario].transacciones) \implies \\
-                cantidadMillasAGanar(distancia,factorPromo(AM_0.promociones,promocion),1.5) \leq \\ millasDisponiblesEnPromo(AM_0.promociones,promocion))\land \\
-                esOro(millasTotales(AM_0.historiales[usuario].transacciones)) \implies \\
-                cantidadMillasAGanar(distancia,factorPromo(AM_0.promociones,promocion),2) \leq \\ millasDisponiblesEnPromo(AM_0.promociones,promocion) )
-                )
+                (promocionSinTope(AM_0.promociones, promocion)\lor \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )
+                
     }
-    \aseguraLargo{ ((promocionSinTope(AM_0.promociones, promocion) \lor
-                    \\esPlatino(AM_0.historiales[usuario].transacciones)) \implies am.promociones= AM_0.promociones\land \\
-                    ¬promocionSinTope(AM_0.promociones, promocion) \implies \\ ( (millasAcumuladas() = millasDisponiblesEnPromo(AM_0.promociones,promocion) \implies \\ am.promociones = delKey(AM_0.promociones,promocion) ) \lor \\                    (esTopeModificadoBronce(am.promociones,AM_0.promociones,promocion,AM_0.historiales,usuario,distancia) \lor \\       esTopeModificadoPlata(am.promociones,AM_0.promociones,promocion,AM_0.historiales,usuario,distancia) \lor \\            esTopeModificadoOro(am.promociones,AM_0.promociones,promocion,AM_0.historiales,usuario,distancia) ) \land\\
-                    esBronce(AM_0.historial[usuario].historialTransaccion)) \implies \\ esHistorialActualizadoBronce(am.historiales, AM_0.historiales,usuario, distancia,\\ factorPromo(AM_0.promociones,promocion),promocion) \land \\
-                    esPlata(AM_0.historiales[usuario].transacciones)) \implies \\ esHistorialActualizadoPlata(am.historiales, AM_0.historiales,usuario, distancia,\\ factorPromo(AM_0.promociones,promocion),promocion) \land \\
-                    esOro(AM_0.historiales[usuario].transacciones)) \implies \\ esHistorialActualizadoOro(am.historiales, AM_0.historiales,usuario, distancia,\\ factorPromo(AM_0.promociones,promocion),promocion) \land\\
-                    esPlatino(AM_0.historiales[usuario].transacciones)) \implies \\ esHistorialActualizadoPlatino(am.historiales, AM_0.historiales,usuario, distancia,\\ factorPromo(AM_0.promociones,promocion),promocion) )
-                    }                  
+    \aseguraLargo{(esBronce(AM_0.historiales[usuario].transacciones)) \implies \\ historialActualizado(am, AM_0, usuario, distancia, 1, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \land alcanzaTope(AM_0, distancia, 1, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \land (esPromocionConTope(AM_0, promocion) \land \lnot alcanzaTope(AM_0, distancia, 1, promocion) \implies restaDelTope(am, AM_0, distancia, 1, promocion))) \\ \land \\ (esPlata(AM_0.historiales[usuario].transacciones) \implies \\ historialActualizado(am, AM_0, usuario, distancia, 1.5, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \land alcanzaTope(AM_0, distancia, 1.5, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \land (esPromocionConTope(AM_0, promocion) \land \lnot alcanzaTope(AM_0, distancia, 1.5, promocion) \implies restaDelTope(am, AM_0, distancia, 1.5, promocion))) \\ \land \\ (esOro(AM_0.historiales[usuario].transacciones) \implies \\ historialActualizado(am, AM_0, usuario, distancia, 2, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \land alcanzaTope(AM_0, distancia, 2, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \land (esPromocionConTope(AM_0, promocion) \land \lnot alcanzaTope(AM_0, distancia, 2, promocion) \implies restaDelTope(am, AM_0, distancia, 2, promocion))) \\ \land \\ 
+    (esPlatino(AM_0.historiales[usuario].transacciones) \implies am.historiales = AM_0.historiales \land am.promociones = AM_0.promociones)}                  
 
 \end{proc}
 
@@ -340,7 +329,10 @@
 }
 \\
 \\
-\pred{promocionSinTope}{promos:Promociones, promo:NombrePromocion}{promos[promocion]_1}
+\pred{esPromocionSinTope}{am : AirMiles, promocion : NombrePromocion}{am.promociones[promocion]_1 = False}
+\\
+\\
+\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{am.promociones[promocion]_1 = True}
 \\
 \\
 \pred{esBronce}{trans:Transacciones}{millasTotales(trans) < 10.000}
@@ -365,6 +357,11 @@
 \\
 \pred{esTopeModificadoOro}{salida:Promociones,entrada:Promociones,p:NombrePromocion,historial:Historiales,u:Usuario,d:Distancia}{
        \\ esOro(historial[u].historialTransaccion) \implies \\salida = setKey(entrada,p,\tupla{entrada[p]_0Xentrada[p]_1Xentrada[p]_0-cantidadMillasAGanar(d,entrada[p]_0,2)})}
+\\
+\\
+\pred{historialActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
+am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(AM_0.historiales, u, "Acumular", d, factorPromo(AM_0, p), cat, p))
+}
 \\
 \\
 \pred{esHistorialActualizadoBronce}{salida:Historiales,entrada:Historiales,u:Usuario,d:Distancia, f:Factor,p:NombrePromocion}{
@@ -409,7 +406,7 @@
 \aux{cantidadMillasAGanar}{dist:Distancia,fact:Factor,cate:R}{Millas}{dist*fact*cate}
 \\
 \\
-\aux{factorPromo}{promos:Promociones, promo:NombrePromocion}{Factor}{promos[promocion]_0}
+\aux{factorPromo}{am : AirMiles, promocion : NombrePromocion}{Factor}{am.promociones[promocion]_0}
 \\
 \\
 \aux{millasDisponiblesEnPromo}{promos:Promociones, promo:NombrePromocion}{Millas}{promos[promocion]_2}
@@ -438,6 +435,18 @@
 \aux{totalTransferidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Transferir","Recibir"},trans[i]_1,0)}
 \\
 \\
+\pred{noSePasaDeTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, \\ promocion : NombrePromocion}{ \\(esBronce(millasTotales(am.historiales[usuario].transacciones))\implies \\
+                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),1) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion))  \\ \land \\
+                (esPlata(millasTotales(am.historiales[usuario].transacciones)) \implies \\
+                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),1.5) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion)) \\ \land \\
+                (esOro(millasTotales(am.historiales[usuario].transacciones)) \implies \\
+                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),2) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion))}
+\\
+\\
+\pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones[promocion]_2 = distancia * categoria * factorPromo(am, promocion)}
+\\
+\\
+\pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones = setKey(AM_0, promocion, \\ \tupla{AM_0.promociones[promocion]_0,AM_0.promociones[promocion]_1, \\ AM_0.promociones[promocion]_2-cantidadMillasAGanar(distancia,AM_0.promociones[promocion]_0,categoria))}}
 
 
 \end{tad}
