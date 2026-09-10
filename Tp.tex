@@ -165,7 +165,7 @@
                 am.historial[dador].transacciones = \\ AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
                 am.historial[dador].transferencias = AM_0.historial[dador].transferencias ++ \seq{receptor} \land 
                 am.historial[receptor].vuelos = AM_0.historial[receptor].vuelos \land \\
-                am.historial[receptor].transacciones = \\ AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
+                am.historial[receptor].transacciones = \\ AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Recibir",millas}} \land \\
                 am.historial[receptor].transferencias = AM_0.historial[receptor].transferencias ++ \seq{dador}
                 
                     }  
@@ -208,8 +208,8 @@
     \aseguraLargo{
         (|am.historiales|<n \implies |res| = |am.historiales|) \land \\
         (|am.historiales|\geq n \implies |res| = n) \land \\ 
+        ((\forall j,k \in \Z)(\ j\in res \land k\in res \land) \imples j \neq k) \land \\
         ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
-        ((\forall j,k \in \Z)(\ j\in res \land_l k\in res \land_l j \neq k ) \yLuego res[j] \neq res[k]) \\ \land
         ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land_L \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
     }
 \end{proc}
@@ -222,13 +222,14 @@
 {
 \In am:AirMiles,
 \In usuario:Usuario
-}{
-\Tipo{\tupla{Millas, Millas, Millas}}
+}{ \\
+\Tipo{\tupla{Transaccion, Transaccion, Transaccion, Transaccion}}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{res_0 = acumuladoPorViajes(am.historiales[usuario].transacciones) \land \\
-                res_1=totalCanjeadas(am.historiales[usuario].transacciones) \land \\
-                res_2=totalTransferidas(am.historiales[usuario].transacciones)}
+    \aseguraLargo{res_0 = \tupla{"Acumular",acumuladoPorViajes(am.historiales[usuario].transacciones)} \land \\
+                res_1= \tupla{"Canjear",totalCanjeadas(am.historiales[usuario].transacciones)} \land \\
+                res_2= \tupla{"Transferir",totalTransferidas(am.historiales[usuario].transacciones)} \land \\
+                res_3= \tupla{"Recibir",totalRecibidas(am.historiales[usuario].transacciones)}}
 \end{proc}
 
 
@@ -250,11 +251,11 @@
 \Inout am:AirMiles,
 \In nombrePromocion : NombrePromocion, \\
 \In factor : Factor,
-\In montoTope : montoTope
+\In tope : montoTope
 }{}
-    \requiere{am=AM_0 \land factor >= 1 \land nombrePromocion \notin AM_0.promociones}
+    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promociones}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,True,montoTope})
+        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,True,tope})
     }
 \end{proc}
 
@@ -294,7 +295,7 @@
     \requiere{|am.historiales|>0}
     \aseguraLargo{
         res \in am.historiales \land \\
-        (\forall k \in \Z)(k \in am.historiales \implicaLuego totalGastadas(am.historiales[k].transacciones) \leq totalGastadas(am.historiales[res].transacciones))
+        (\forall k \in \Z)(k \in am.historiales \implicaLuego \\ totalGastadas(am.historiales[k].transacciones) \leq totalGastadas(am.historiales[res].transacciones))
     }
     
 \end{proc}
@@ -309,8 +310,8 @@
     \requiere{True}
     \aseguraLargo{
         (sinRepetidosNiAnagramas(res) \land \\
-        (\forall i,j \in Z)((i,j \in am.historiales \ \yLuego i\neq j\ \land \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res ) \land \\ 
-        (\forall k : Z)(0\leq k < |res| \implicaLuego (res[i]_0 \in am.historiales \land res[i]_1\in am.historiales \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
+        (\forall i,j \in Z)((i,j \in am.historiales \ \land i\neq j\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res )) \land \\ 
+        (\forall k : Z)(0\leq k < |res| \implicaLuego (res[k]_0 \in am.historiales \land res[k]_1\in am.historiales \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
     }
 \end{proc}
 
@@ -355,7 +356,7 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \\
 \\
 \pred{sonParejaTransferidores}{hist: Historiales, usuario1:Usuario,\\ usuario2:Usuario}{\\
-(|hist[usuario1].transferencias| > 0) \land (|hist[usuario2].transferencias| > 0) \\ \land
+(|hist[usuario1].transferencias| > 0) \land (|hist[usuario2].transferencias| > 0)  \land \\
 (\forall i \in Z)(0 \leq i < |hist[usuario1].transferencias| \implicaLuego (hist[usuario1].transferencias[i] = usuario2) \ \land 
 (\forall j \in Z)(0 \leq j < |hist[usuario2].transferencias| \implicaLuego (hist[usuario2].transferencias[j] = usuario1) \\
 }
@@ -394,7 +395,7 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \\
 \\
 \aux{historialIndividualModificado}{hist:Historiales,u:Usuario,accion:Accion,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
-            \\struct<hist[u].transacciones++\seq{accion,d*f*cat,""},hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}},\\ hist[u].transferencias>
+            \\struct<transacciones: hist[u].transacciones++\seq{accion,d*f*cat}, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}},\\ transferencias: hist[u].transferencias>
 }
 \\
 \\
@@ -410,7 +411,10 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \aux{totalGastadas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Canjear","Transferir"},trans[i]_1,0)}
 \\
 \\
-\aux{totalTransferidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Transferir","Recibir"},trans[i]_1,0)}
+\aux{totalTransferidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 = "Transferir",trans[i]_1,0)}
+\\
+\\
+\aux{totalRecibidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 = "Recibir",trans[i]_1,0)}
 \\
 \\
 
