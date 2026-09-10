@@ -52,9 +52,9 @@
     \item[]Distancia ES $\mathbb{R}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\
     \item[]Millas ES $\mathbb{R}$
-    \item[]Transaccion ES $\tupla{Accion X Millas}$
+    \item[]Transaccion ES $\tupla{Accion, Millas}$
     \item[]Transacciones ES $\seq{Transaccion}$ 
-    \item[]Transferencias ES $\seq{Usuario}$     
+    \item[]Transferencias ES $\seq{\tupla{Accion, Millas, Usuario}}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     \item[]Historial ES struct $\langle$ transacciones: Transacciones, vuelos: Vuelos, transferencias: Transferencias $\rangle$
     \item[] Historiales ES $\Diccionario{Usuario}{Historial}$
@@ -163,10 +163,10 @@
                 igualesSalvo(am,AM_0,\seq{dador,receptor} \land \\
                 am.historial[dador].vuelos = AM_0.historial[dador].vuelos \land \\
                 am.historial[dador].transacciones = \\ AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
-                am.historial[dador].transferencias = AM_0.historial[dador].transferencias ++ \seq{receptor} \land 
+                am.historial[dador].transferencias = \\ AM_0.historial[dador].transferencias ++ \seq{\tupla{"Transferir",millas,receptor}} \land \\
                 am.historial[receptor].vuelos = AM_0.historial[receptor].vuelos \land \\
                 am.historial[receptor].transacciones = \\ AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Recibir",millas}} \land \\
-                am.historial[receptor].transferencias = AM_0.historial[receptor].transferencias ++ \seq{dador}
+                am.historial[receptor].transferencias = \\ AM_0.historial[receptor].transferencias ++ \seq{\tupla{"Recibir",millas,dador}}
                 
                     }  
 \end{proc}
@@ -357,8 +357,8 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \\
 \pred{sonParejaTransferidores}{hist: Historiales, usuario1:Usuario,\\ usuario2:Usuario}{\\
 (|hist[usuario1].transferencias| > 0) \land (|hist[usuario2].transferencias| > 0)  \land \\
-(\forall i \in Z)(0 \leq i < |hist[usuario1].transferencias| \implicaLuego (hist[usuario1].transferencias[i] = usuario2) \ \land 
-(\forall j \in Z)(0 \leq j < |hist[usuario2].transferencias| \implicaLuego (hist[usuario2].transferencias[j] = usuario1) \\
+(\forall i \in Z)(0 \leq i < |hist[usuario1].transferencias| \implicaLuego (hist[usuario1].transferencias[i]_2 = usuario2) \ \land 
+(\forall j \in Z)(0 \leq j < |hist[usuario2].transferencias| \implicaLuego (hist[usuario2].transferencias[j]_2 = usuario1) \\
 }
 \\
 \\
