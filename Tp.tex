@@ -395,7 +395,7 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \\
 \\
 \aux{historialIndividualModificado}{hist:Historiales,u:Usuario,accion:Accion,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
-            \\struct<transacciones: hist[u].transacciones++\seq{accion,d*f*cat}, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,promo,f}},\\ transferencias: hist[u].transferencias>
+            \\struct<transacciones: hist[u].transacciones++\seq{accion,d*f*cat}, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,p,f}},\\ transferencias: hist[u].transferencias>
 }
 \\
 \\
