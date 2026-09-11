@@ -51,12 +51,12 @@
     \item[]Distancia ES $\mathbb{R}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\
     \item[]Millas ES $\mathbb{R}$
-    \item[]Transaccion ES tupla $\tupla{Accion, Millas}$
-    \item[]Transacciones ES $\seq{Transaccion}$ 
+    \item[]CanjeadoReferido ES tupla $\tupla{Accion, Millas}$
+    \item[]CanjeadosReferidos ES $\seq{CanjeadoReferido}$ 
     \item[]Transferencia ES tupla $\tupla{Accion, Millas, Usuario}}$
     \item[]Transferencias ES $\seq{Transferencia}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
-    \item[]Historial ES struct $\langle$transacciones: Transacciones, vuelos: Vuelos, transferencias: Transferencias$\rangle$
+    \item[]Historial ES struct $\langle$canjeadosreferidos: CanjeadosReferidos, vuelos: Vuelos, transferencias: Transferencias$\rangle$
     \item[] Historiales ES $\Diccionario{Usuario}{Historial}$
     \item[] Promociones ES $\Diccionario{NombrePromocion}{PromocionActiva}$
     
@@ -91,7 +91,7 @@
 }
 {}
     \requiere{am=AM_0   \land  usuario \notin AM_0.historiales }
-    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<>) \ \land \
+    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadosreferidos:<>,vuelos:<>,transferencias:<>\ >) \ \land \
         am.promociones = AM_0.promociones
         }
 \end{proc}
@@ -106,12 +106,8 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
-    am.historiales[usuarioReferido].transacciones = <\tupla{"Referido",500}> \land \\
-    am.historiales[usuarioReferido].vuelos = <> \land \\
-    am.historiales[usuarioReferido].transferencias = <> \land \\
-    am.historiales[usuarioReferidor].transacciones = \\ AM_0.historiales[usuarioReferidor].transacciones ++ \seq{\tupla{"Referidor",500}} \land \\
-    am.historiales[usuarioReferidor].vuelos = AM_0.historiales[usuarioReferidor].vuelos \land \\
-    am.historiales[usuarioReferidor].transferencias = \\ AM_0.historiales[usuarioReferidor].transferencias \land \\
+    esCanjeadosReferidosActualizado(am.historiales[usuarioReferido],\\AM_0.historiales[usuarioReferido],"Referido",500)\land \\
+    esCanjeadosReferidosActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
                     }
 \end{proc}
@@ -125,11 +121,11 @@
 \In promocion: NombrePromocion
 }{}
     \requiere{am = AM_0 \land usuario \in AM_0.historiales \land promocion \in AM_0.promociones \land \\
-                (promocionSinTope(AM_0.promociones, promocion)\lor \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )
-                
+                (esPromocionSinTope(AM_0.promociones, promocion)\lor \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
     }
-    \aseguraLargo{(esBronce(AM_0.historiales[usuario].transacciones) \implies \\ (historialActualizado(am, AM_0, usuario, distancia, 1, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia, 1, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ \lnot alcanzaTope(AM_0, distancia, 1, promocion) \implies restaDelTope(am, AM_0, distancia, 1, promocion)))) \\ \land \\ (esPlata(AM_0.historiales[usuario].transacciones) \implies \\ (historialActualizado(am, AM_0, usuario, distancia, 1.5, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia, 1.5, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ \lnot alcanzaTope(AM_0, distancia, 1.5, promocion) \implies restaDelTope(am, AM_0, distancia, 1.5, promocion)))) \\ \land \\ (esOro(AM_0.historiales[usuario].transacciones) \implies \\ (historialActualizado(am, AM_0, usuario, distancia, 2, promocion) \land \\ (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia, 2, promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ \lnot alcanzaTope(AM_0, distancia, 2, promocion) \implies restaDelTope(am, AM_0, distancia, 2, promocion)))) \\ \land \\ 
-    (esPlatino(AM_0.historiales[usuario].transacciones) \implies (am.historiales = \\ setKey(AM_0.historiales, usuario, struct<AM_0.historiales[usuario].transacciones, \\ AM_0.historiales[usuario].vuelos ++ \seq{\tupla{distancia,0,promocion,factorPromo(AM_0, promocion)}},\\ AM_0,historiales[usuario].transferencias>) \land am.promociones = AM_0.promociones))}                  
+    \aseguraLargo{  esVueloActualizado(am,AM_0,usuario,distancia,categoria(AM_0.historial[usuario]),promocion)\ \land 
+    (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \ \land \\ alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)))) \\
+          }
 
 \end{proc}
 
@@ -140,13 +136,11 @@
 \In usuario:Usuario,
 \In millas:Millas
 }{}
-    \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(AM_0.historiales[usuario].transacciones)}
+    \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(AM_0.historiales[usuario])}
     \aseguraLargo{
         am.promociones = AM_0.promociones \land \\
         igualSalvo(am.historiales,AM_0.historiales,\tupla{usuario}) \land \\
-        am.historial[usuario].transacciones = \\ AM_0.historial[usuario].transacciones ++ \seq{\tupla{"Canjear",millas}} \land \\
-        am.historial[usuario].viajes = AM_0.historial[usuario].viajes \land \\
-        am.historial[usuario].transferencias = AM_0.historial[usuario].transferencias        
+        esCanjeadosReferidosActualizado(am.historiales[usuario],\\AM_0.historiales[usuario],"Canjear",millas) 
                 }
 \end{proc}
 
@@ -158,19 +152,13 @@
 \In receptor : Usuario,\\
 \In millas : Millas
 }{}    
-    \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(AM_0.historiales[dador].transacciones) \geq millas}
+    \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(AM_0.historiales[dador]) \geq millas}
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
                 igualSalvo(am.historiales,AM_0.historiales,\tupla{dador,receptor}) \land \\
-                am.historial[dador].vuelos = AM_0.historial[dador].vuelos \land \\
-                am.historial[dador].transacciones = \\ AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
-                am.historial[dador].transferencias = \\ AM_0.historial[dador].transferencias ++ \seq{\tupla{"Transferir",millas,receptor}} \land \\
-                am.historial[receptor].vuelos = AM_0.historial[receptor].vuelos \land \\
-                am.historial[receptor].transacciones = \\ AM_0.historial[receptor].transacciones ++ \seq{\tupla{"Recibir",millas}} \land \\
-                am.historial[receptor].transferencias = \\ AM_0.historial[receptor].transferencias ++ \seq{\tupla{"Recibir",millas,dador}}
-                
+                esTransferenciasActualizado(am.historiales[dador],\\AM_0.historiales[dador],"Transferir",millas,receptor) \land \\
+                esTransferenciasActualizado(am.historiales[receptor],\\AM_0.historiales[receptor],"Recibir",millas,dador) 
                     }  
 \end{proc}
-
 
 \begin{proc}{consultarSaldo}
 {
@@ -180,7 +168,7 @@
 \Tipo{Millas}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{res = millasDisponibles(am.historiales[usuario].transacciones)}
+    \aseguraLargo{res = millasDisponibles(am.historiales[usuario])}
 \end{proc}
 
 \begin{proc}{consultarCategoria}{
@@ -190,10 +178,10 @@
 \Tipo{Categoria}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{(res = "Bronce" \iff millasTotales(am.historiales[usuario].transacciones) < 10.000) \land \\
-            (res = "Plata" \iff millasTotales(am.historiales[usuario].transacciones) \geq 10.000 \land millasTotales(am.historiales[usuario].transacciones) < 50.000) \land \\
-            (res = "Oro" \iff millasTotales(am.historiales[usuario].transacciones) \geq 50.000 \ \land \\ millasTotales(am.historiales[usuario].transacciones) < 1.000.000) \land \\
-            (res = "Platino" \iff millasTotales(am.historiales[usuario].transacciones) \geq 1.000.000) \\
+    \aseguraLargo{(res = "Bronce" \iff millasTotales(am.historiales[usuario]) < 10.000) \land \\
+            (res = "Plata" \iff  10.000 \leq millasTotales(am.historiales[usuario]) < 50.000) \land \\
+            (res = "Oro" \iff 50.000 \leq millasTotales(am.historiales[usuario]) < 1.000.000) \land \\
+            (res = "Platino" \iff millasTotales(am.historiales[usuario]) \geq 1.000.000) \\
             }
 \end{proc}
 
@@ -204,13 +192,13 @@
 }{
 \Tipo{\seq{Usuario}}
 }
-    \requiere{n > 0}
+    \requiere{|am.historiales|>0\land n > 0}
     \aseguraLargo{
         (|am.historiales|<n \implies |res| = |am.historiales|) \land \\
         (|am.historiales|\geq n \implies |res| = n) \land \\ 
-        ((\forall j,k \in \Z)(\ j\in res \land k\in res \land) \imples j \neq k) \land \\
+        ((\forall j,k \in \Z)(\ j\in res \land k\in res) \implies j \neq k) \land \\
         ((\forall u \in \Z)  \ u\in res \implies u \in am.historiales) \land_L \\
-        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]].transacciones)) \geq millasDisponibles(am.historiales[res[i+1]].transacciones) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land_L \\millasDisponibles(am.historiales[u].transacciones) > \\millasDisponibles(am.historiales[res[|res|-1]].transacciones))                       
+        ((\forall i \in \Z) \ 0 \leq i < |res| - 1 \implicaLuego millasDisponibles(am.historiales[res[i]])) \geq \\millasDisponibles(am.historiales[res[i+1]]) \land \\\lnot ((\exists u \in \Z) u \in am.historiales \land  u \notin res \land_L \\millasDisponibles(am.historiales[u]) > \\millasDisponibles(am.historiales[res[|res|-1]]))                       
     }
 \end{proc}
 
@@ -223,13 +211,13 @@
 \In am:AirMiles,
 \In usuario:Usuario
 }{ \\
-\Tipo{\tupla{Transaccion, Transaccion, Transaccion, Transaccion}}
+\Tipo{\tupla{\tupla{Accion,Millas},\tupla{Accion,Millas},\tupla{Accion,Millas},\tupla{Accion,Millas}}}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{res_0 = \tupla{"Acumular",acumuladoPorViajes(am.historiales[usuario].transacciones)} \land \\
-                res_1= \tupla{"Canjear",totalCanjeadas(am.historiales[usuario].transacciones)} \land \\
-                res_2= \tupla{"Transferir",totalTransferidas(am.historiales[usuario].transacciones)} \land \\
-                res_3= \tupla{"Recibir",totalRecibidas(am.historiales[usuario].transacciones)}}
+    \aseguraLargo{res_0 = \tupla{"Acumular",acumuladoPorViajes(am.historiales[usuario])} \land \\
+                res_1= \tupla{"Canjear",totalCanjeadas(am.historiales[usuario])} \land \\
+                res_2= \tupla{"Transferir",totalTransferidas(am.historiales[usuario])} \land \\
+                res_3= \tupla{"Recibir",totalRecibidas(am.historiales[usuario])}}
 \end{proc}
 
 
@@ -281,7 +269,7 @@
     \requiere{|am.historiales|>0}
     \aseguraLargo{
         res \in am.historiales \yLuego \\
-        (\forall k \in \Z)(k \in am.historiales \implicaLuego \ millasTotales(am.historiales[k].transacciones)\\ \leq millasTotales(am.historiales[res].transacciones))
+        (\forall k \in \Z)(k \in am.historiales \implicaLuego \ millasTotales(am.historiales[k])\\ \leq millasTotales(am.historiales[res]))
         }
 \end{proc}
 
@@ -295,7 +283,7 @@
     \requiere{|am.historiales|>0}
     \aseguraLargo{
         res \in am.historiales \yLuego \\
-        (\forall k \in \Z)(k \in am.historiales \implicaLuego \\ totalGastadas(am.historiales[k].transacciones) \leq totalGastadas(am.historiales[res].transacciones))
+        (\forall k \in \Z)(k \in am.historiales \implicaLuego \\ totalGastadas(am.historiales[k]) \leq totalGastadas(am.historiales[res]))
     }
     
 \end{proc}
@@ -315,8 +303,17 @@
     }
 \end{proc}
 
-
-
+\\
+\pred{esCanjeadosReferidosActualizado}{hist:Historial,hist0:Historial,accion:Accion,millas:Millas}{
+hist = <canjeadosreferidos : hist0.canjeadosreferidos++\tupla{accion,millas}, vuelos : hist0.vuelos, transferencias : hist0.transferencias  >
+}
+\\
+\\
+\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,accion:Accion,millas:Milla,usuario:Usuario}{\\
+hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\tupla{accion,millas,usuario}  >
+}
+\\
+\\
 \pred{igualSalvo}{dict1: dicc<K, V>, dict2: dicc<K, V>, ignorar: \conj{Usuario}}{\\
     (\forall i : K) ((i \in dict1 \land i \notin ignorar) \implicaLuego (i \in dict2 \yLuego dict1[i] = dict2[i])) \land \\
     (\forall j : K) (j \in dict2 \land j \notin ignorar) \implicaLuego (j \in dict1 \yLuego dict1[j] = dict2[j]) 
@@ -329,30 +326,21 @@
 \pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{ \\ am.promociones[promocion]_1 = True}
 \\
 \\
-\pred{esBronce}{trans:Transacciones}{millasTotales(trans) < 10.000}
+\pred{esBronce}{hist:Historial}{millasTotales(hist) < 10.000}
 \\
 \\
-\pred{esPlata}{trans:Transacciones}{10.000 \leq millasTotales(trans) < 50.000}
+\pred{esPlata}{hist:Historial}{10.000 \leq millasTotales(hist) < 50.000}
 \\
 \\
-\pred{esOro}{trans:Transacciones}{50.000 \leq millasTotales(trans) < 1.000.000}
+\pred{esOro}{hist:Historial}{50.000 \leq millasTotales(hist) < 1.000.000}
 \\
 \\
-\pred{esPlatino}{trans:Transacciones}{millasTotales(trans) \geq 1.000.000}
+\pred{esPlatino}{hist:Historial}{millasTotales(hist) \geq 1.000.000}
 \\
 \\
-\pred{historialActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
-am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(AM_0.historiales, u, "Acumular", d, factorPromo(AM_0, p), cat, p))
+\pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
+am.historiales = setKey(AM_0.historiales, u,  \\ agregarVuelo(AM_0.historiales, u, d, factorPromo(AM_0, p), cat, p))
 }
-\\
-\\
-\pred{esUso}{accion:Accion}{ accion \in  \seq{"Transferir","Canjear"} }
-\\
-\\
-\pred{ganaTotales}{accion:Accion}{ accion \in  \seq{"Recibir","Acumular","Referidor","Referido"} }
-\\
-\\
-\pred{pierdeTotales}{accion:Accion}{ accion \in  \seq{"Transferir"} }
 \\
 \\
 \pred{sonParejaTransferidores}{hist: Historiales, usuario1:Usuario,\\ usuario2:Usuario}{\\
@@ -367,12 +355,9 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 }
 \\
 \\
-\pred{noSePasaDeTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, \\ promocion : NombrePromocion}{ \\(esBronce(millasTotales(am.historiales[usuario].transacciones))\implies \\
-                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),1) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion))  \\ \land \\
-                (esPlata(millasTotales(am.historiales[usuario].transacciones)) \implies \\
-                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),1.5) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion)) \\ \land \\
-                (esOro(millasTotales(am.historiales[usuario].transacciones)) \implies \\
-                cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),2) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion))}
+\pred{noSePasaDeTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, \\ promocion : NombrePromocion}{ \\
+cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),\\categoria(am.historiales[usuario]) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion)
+}
 \\
 \\
 \pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones[promocion]_2 = distancia * categoria * factorPromo(am, promocion)}
@@ -381,8 +366,18 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones = setKey(AM_0, promocion, \\ \tupla{AM_0.promociones[promocion]_0,AM_0.promociones[promocion]_1, \\ AM_0.promociones[promocion]_2-cantidadMillasAGanar(distancia,AM_0.promociones[promocion]_0,categoria))}}
 \\
 \\
-
-\aux{millasTotales}{t: Transacciones}{\R}{ \\ \sum_{i=0}^{|t|-1} (IfThenElse(ganaTotales(t[i]_0), t[i]_1, 0) - ifThenElse(pierdeTotales(t[i]_0), t[i]_1, 0))}
+\aux{categoria}{hist:Historial}{\R}{
+IfThenElse(esBronce(hist),1,0) + IfThenElse(esPlata(hist),1.5,0) 
++ IfThenElse(esOro(hist),2,0)
+}
+\\
+\\
+\aux{millasTotales}{hist: Historial}{\R}{ \\ 
+\sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i]_1 + \\
+\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i]_0 = "Canjear" ,\\0,hist.canjeadosreferidos[i]_1)+\\
+\sum_{i=0}^{|hist.transferencias|-1}
+IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_1,hist.transferencias[i]_1)
+}
 \\
 \\
 \aux{cantidadMillasAGanar}{dist:Distancia,fact:Factor,cate:R}{Millas}{dist*fact*cate}
@@ -394,27 +389,32 @@ am.historiales = setKey(AM_0.historiales, u,  \\ historialIndividualModificado(A
 \aux{millasDisponiblesEnPromo}{promos:Promociones, promo:NombrePromocion}{Millas}{promos[promocion]_2}
 \\
 \\
-\aux{historialIndividualModificado}{hist:Historiales,u:Usuario,accion:Accion,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
-            \\struct<transacciones: hist[u].transacciones++\seq{accion,d*f*cat}, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,p,f}},\\ transferencias: hist[u].transferencias>
+\aux{agregarVuelo}{hist:Historiales,u:Usuario,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
+            \\struct<canjeadosreferidos: hist[u].canjeadosreferidos, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,p,f}},\\ transferencias: hist[u].transferencias>
 }
 \\
 \\
-\aux{millasDisponibles}{trans: Transacciones}{\R}{$\sum_{i=0}^{|trans|-1}$ ifThenElse(esUso(trans[i]_0)), -1*trans[i]_1, trans[i]_1)} 
+\aux{millasDisponibles}{hist: Historial}{\R}{\\
+\sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i]_1 + \\
+\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i]_0 = "Canjear" ,\\-1*hist.canjeadosreferidos[i]_1,hist.canjeadosreferidos[i]_1)+\\
+\sum_{i=0}^{|hist.transferencias|-1}
+IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_1,hist.transferencias[i]_1)
+}
 \\
 \\
-\aux{acumuladoPorViajes}{trans:Transacciones}{Millas}{ \\ $\sum_{i=0}^{|trans|-1}$ ifThenElse(trans[i]_0 ="Acumular",trans[i]_1,0)}
+\aux{acumuladoPorViajes}{hist:Historial}{Millas}{ \\ $\sum_{i=0}^{|hist.vuelos|-1}$ hist.vuelo_1}
 \\
 \\
-\aux{totalCanjeadas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 ="Canjear",trans[i]_1,0)}
+\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadosreferidos|-1}$ \\ifThenElse(hist.canjeadosreferidos[i]_0  ="Canjear",hist.canjeadosreferidos[i]_1,0)}
 \\
 \\
-\aux{totalGastadas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Canjear","Transferir"},trans[i]_1,0)}
+\aux{totalGastadas}{trans:Transacciones}{Millas}{\\$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Canjear","Transferir"},trans[i]_1,0)}
 \\
 \\
-\aux{totalTransferidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 = "Transferir",trans[i]_1,0)}
+\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i]_0 = "Transferir",hist.transferencias[i]_1,0)}
 \\
 \\
-\aux{totalRecibidas}{trans:Transacciones}{Millas}{$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 = "Recibir",trans[i]_1,0)}
+\aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i]_0 = "Recibir",hist.transferencias[i]_1,0)}
 \\
 \\
 
