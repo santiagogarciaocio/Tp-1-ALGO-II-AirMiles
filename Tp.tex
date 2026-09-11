@@ -41,22 +41,22 @@
 
 \begin{itemize}
     \item[]NombrePromocion ES String
-    \item[]PromocionActiva ES $\tupla{Factor, tieneTope, montoTope}$
-    \item[]PromocionesActivas ES $\seq{PromocionActiva}$
+    \item[]PromocionActiva ES tupla $\tupla{Factor, tieneTope, montoTope}$
     \item[]Factor ES $\mathbb{R}$ 
     \item[]tieneTope ES Bool
     \item[]montoTope ES $\mathbb{Z}$    
     \item[]Usuario ES $\mathbb{Z}$  
-    \item[]Vuelo ES $\tupla{Distancia,Millas,NombrePromocion,Factor}$
+    \item[]Vuelo ES tupla $ \tupla{Distancia,Millas,NombrePromocion,Factor}$
     \item[]Vuelos ES $\seq{Vuelo}$
     \item[]Distancia ES $\mathbb{R}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\
     \item[]Millas ES $\mathbb{R}$
-    \item[]Transaccion ES $\tupla{Accion, Millas}$
+    \item[]Transaccion ES tupla $\tupla{Accion, Millas}$
     \item[]Transacciones ES $\seq{Transaccion}$ 
-    \item[]Transferencias ES $\seq{\tupla{Accion, Millas, Usuario}}$     
+    \item[]Transferencia ES tupla $\tupla{Accion, Millas, Usuario}}$
+    \item[]Transferencias ES $\seq{Transferencia}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
-    \item[]Historial ES struct $\langle$ transacciones: Transacciones, vuelos: Vuelos, transferencias: Transferencias $\rangle$
+    \item[]Historial ES struct $\langle$transacciones: Transacciones, vuelos: Vuelos, transferencias: Transferencias$\rangle$
     \item[] Historiales ES $\Diccionario{Usuario}{Historial}$
     \item[] Promociones ES $\Diccionario{NombrePromocion}{PromocionActiva}$
     
@@ -143,7 +143,7 @@
     \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(AM_0.historiales[usuario].transacciones)}
     \aseguraLargo{
         am.promociones = AM_0.promociones \land \\
-        igualSalvo(am,AM_0,\tupla{usuario}) \land \\
+        igualSalvo(am.historiales,AM_0.historiales,\tupla{usuario}) \land \\
         am.historial[usuario].transacciones = \\ AM_0.historial[usuario].transacciones ++ \seq{\tupla{"Canjear",millas}} \land \\
         am.historial[usuario].viajes = AM_0.historial[usuario].viajes \land \\
         am.historial[usuario].transferencias = AM_0.historial[usuario].transferencias        
@@ -160,7 +160,7 @@
 }{}    
     \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(AM_0.historiales[dador].transacciones) \geq millas}
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
-                igualesSalvo(am,AM_0,\seq{dador,receptor} \land \\
+                igualSalvo(am.historiales,AM_0.historiales,\tupla{dador,receptor}) \land \\
                 am.historial[dador].vuelos = AM_0.historial[dador].vuelos \land \\
                 am.historial[dador].transacciones = \\ AM_0.historial[dador].transacciones ++ \seq{\tupla{"Transferir",millas}} \land \\
                 am.historial[dador].transferencias = \\ AM_0.historial[dador].transferencias ++ \seq{\tupla{"Transferir",millas,receptor}} \land \\
@@ -280,7 +280,7 @@
 }
     \requiere{|am.historiales|>0}
     \aseguraLargo{
-        res \in am.historiales \land \\
+        res \in am.historiales \yLuego \\
         (\forall k \in \Z)(k \in am.historiales \implicaLuego \ millasTotales(am.historiales[k].transacciones)\\ \leq millasTotales(am.historiales[res].transacciones))
         }
 \end{proc}
@@ -294,7 +294,7 @@
 }
     \requiere{|am.historiales|>0}
     \aseguraLargo{
-        res \in am.historiales \land \\
+        res \in am.historiales \yLuego \\
         (\forall k \in \Z)(k \in am.historiales \implicaLuego \\ totalGastadas(am.historiales[k].transacciones) \leq totalGastadas(am.historiales[res].transacciones))
     }
     
@@ -305,13 +305,13 @@
 {
 \In am:AirMiles
 }{
-\Tipo{\seq{\tupla{Usuario,Usuario}}}
+\Tipo{\seq{tupla\tupla{Usuario,Usuario}}}
 }
     \requiere{True}
     \aseguraLargo{
         (sinRepetidosNiAnagramas(res) \land \\
-        (\forall i,j \in Z)((i,j \in am.historiales \ \land i\neq j\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res )) \land \\ 
-        (\forall k : Z)(0\leq k < |res| \implicaLuego (res[k]_0 \in am.historiales \land res[k]_1\in am.historiales \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
+        (\forall i,j \in Z)(((i,j \in am.historiales \ \land i\neq j)\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res )) \land \\ 
+        (\forall k : Z)(0\leq k < |res| \implicaLuego ((res[k]_0 \in am.historiales \land res[k]_1\in am.historiales) \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
     }
 \end{proc}
 
