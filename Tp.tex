@@ -106,7 +106,7 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
     \aseguraLargo{am.promociones = AM_0.promociones \land \\
-    esCanjeadosReferidosActualizado(am.historiales[usuarioReferido],\\AM_0.historiales[usuarioReferido],"Referido",500)\land \\
+    am.historiales[usuarioReferido] = <canjeadosreferidos: <("Referido",500)> , \\ vuelos:<>,transferencias:<>>\land \\
     esCanjeadosReferidosActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
                     }
