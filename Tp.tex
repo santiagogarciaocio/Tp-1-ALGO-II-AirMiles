@@ -178,10 +178,10 @@
 \Tipo{Categoria}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{(res = "Bronce" \iff millasTotales(am.historiales[usuario]) < 10.000) \land \\
-            (res = "Plata" \iff  10.000 \leq millasTotales(am.historiales[usuario]) < 50.000) \land \\
-            (res = "Oro" \iff 50.000 \leq millasTotales(am.historiales[usuario]) < 1.000.000) \land \\
-            (res = "Platino" \iff millasTotales(am.historiales[usuario]) \geq 1.000.000) \\
+    \aseguraLargo{(res = "Bronce" \iff esBronce(am.historiales[usuario]) \land \\
+            (res = "Plata" \iff  esPlata(am.historiales[usuario]) \land \\
+            (res = "Oro" \iff esOro(am.historiales[usuario]) \land \\
+            (res = "Platino" \iff esPlatino(am.historiales[usuario]) \\
             }
 \end{proc}
 
