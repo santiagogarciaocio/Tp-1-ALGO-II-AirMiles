@@ -339,7 +339,7 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 \\
 \\
 \pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
-am.historiales = setKey(AM_0.historiales, u,  \\ agregarVuelo(AM_0.historiales, u, d, factorPromo(AM_0, p), cat, p))
+am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, \\ vuelos: AM_0.historiales[u].vuelos ++ \seq{\tupla{d,d*factorPromo(AM_0,p)*cat,p,factorPromo(AM_0,p)}},\\ transferencias: AM_0.historiales[u].transferencias>)
 }
 \\
 \\
@@ -399,9 +399,6 @@ IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_
 \aux{millasDisponiblesEnPromo}{promos:Promociones, promo:NombrePromocion}{Millas}{promos[promocion]_2}
 \\
 \\
-\aux{agregarVuelo}{hist:Historiales,u:Usuario,d:Distancia, f:Factor,cat:R,p:NombrePromocion}{Historial}{
-            \\struct<canjeadosreferidos: hist[u].canjeadosreferidos, \\ vuelos: hist[u].vuelos ++ \seq{\tupla{d,d*f*cat,p,f}},\\ transferencias: hist[u].transferencias>
-}
 \\
 \\
 \aux{millasDisponibles}{hist: Historial}{\R}{\\
