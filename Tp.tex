@@ -47,13 +47,12 @@
     \item[]Vuelo ES struct $ \struct{distancia: Distancia,millas: Millas,promocion: NombrePromocion,factor: Factor}$
     \item[]Vuelos ES $\seq{Vuelo}$
     \item[]Distancia ES $\mathbb{R}$
-    \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\
     \item[]Millas ES $\mathbb{R}$
     \item[]CanjeadoReferido ES struct $\struct{transaccion: String,millas: Millas}$
     \item[]CanjeadosReferidos ES $\seq{CanjeadoReferido}$ 
     \item[]Transferencia ES struct $\struct{transaccion: String,millas: Millas,usuario: Usuario}}$
     \item[]Transferencias ES $\seq{Transferencia}$     
-    \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
+    \item[]Categoria ES String
     \item[]Historial ES struct $\langle$canjeadosreferidos: CanjeadosReferidos, vuelos: Vuelos, transferencias: Transferencias$\rangle$
     
     
@@ -213,13 +212,13 @@
 \In am:AirMiles,
 \In usuario:Usuario
 }{ \\
-\Tipo{\tupla{\tupla{Accion,Millas},\tupla{Accion,Millas},\tupla{Accion,Millas},\tupla{Accion,Millas}}}
+\Tipo{tupla \tupla{Millas, Millas, Millas, Millas}}
 }
     \requiere{usuario \in am.historiales}
-    \aseguraLargo{res_0 = \tupla{"Acumular",acumuladoPorViajes(am.historiales[usuario])} \land \\
-                res_1= \tupla{"Canjear",totalCanjeadas(am.historiales[usuario])} \land \\
-                res_2= \tupla{"Transferir",totalTransferidas(am.historiales[usuario])} \land \\
-                res_3= \tupla{"Recibir",totalRecibidas(am.historiales[usuario])}}
+    \aseguraLargo{res_0 = acumuladoPorViajes(am.historiales[usuario]) \land \\
+                res_1= totalCanjeadas(am.historiales[usuario]) \land \\
+                res_2= totalTransferidas(am.historiales[usuario]) \land \\
+                res_3= totalRecibidas(am.historiales[usuario])}
 \end{proc}
 
 
