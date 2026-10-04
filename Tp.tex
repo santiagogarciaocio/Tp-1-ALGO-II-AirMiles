@@ -301,8 +301,8 @@
     \requiere{True}
     \aseguraLargo{
         sinRepetidos(res) \land sinAnagramas(res) \land \\
-        (\forall i,j \in Z)(((i,j \in am.historiales \ \land i\neq j)\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res )) \land \\ 
-        (\forall k : Z)(0\leq k < |res| \implicaLuego ((res[k]_0 \in am.historiales \land res[k]_1\in am.historiales) \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
+        todosLosParesExclusivosDeHistorialesEstanEnRes(am, res) \land \\ 
+        todosLosQueEstanEnResSonParesExclusivos(am, res)
     }
 \end{proc}
 
@@ -349,8 +349,8 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 \\
 \pred{sonParejaTransferidores}{hist: Historiales, usuario1:Usuario,\\ usuario2:Usuario}{\\
 (|hist[usuario1].transferencias| > 0) \land (|hist[usuario2].transferencias| > 0)  \land \\
-(\forall i \in Z)(0 \leq i < |hist[usuario1].transferencias| \implicaLuego (hist[usuario1].transferencias[i]_2 = usuario2) \ \land 
-(\forall j \in Z)(0 \leq j < |hist[usuario2].transferencias| \implicaLuego (hist[usuario2].transferencias[j]_2 = usuario1) \\
+(\forall i \in Z)(0 \leq i < |hist[usuario1].transferencias| \implicaLuego \\ (hist[usuario1].transferencias[i].usuario = usuario2) \ \land \\
+(\forall j \in Z)(0 \leq j < |hist[usuario2].transferencias| \implicaLuego \\(hist[usuario2].transferencias[j].usuario = usuario1) \\
 }
 \\
 \\
@@ -381,12 +381,22 @@ cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categor
 \\
 \\
 \pred{listaOrdenadaPorMillasDisponibles}{am : AirMiles, s : \seq{Usuario}}{ \\
-(\forall i \in Usuario) \ 0 \leq i < |s| - 1 \implicaLuego millasDisponibles(am.historiales[s[i]]) \geq \\millasDisponibles(am.historiales[s[i+1]])
+(\forall i \in \Z) \ 0 \leq i < |s| - 1 \implicaLuego millasDisponibles(am.historiales[s[i]]) \geq \\millasDisponibles(am.historiales[s[i+1]])
 }
 \\
 \\
 \pred{sinRepetidos}{s : \seq{T}}{
 (\forall i \in \Z)(0 \leq i < |s| \implicaLuego cantidadDeApariciones(s,s[i]) = 1) 
+}
+\\
+\\
+\pred{todosLosParesExclusivosDeHistorialesEstanEnRes}{am : AirMiles,\\ s : \seq{tupla\tupla{Usuario, Usuario}}}{
+(\forall i,j \in Usuario)((i,j \in am.historiales \ \land i\neq j)\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implies (\tupla{i,j} \in s \lor \tupla{j,i} \in s )
+}
+\\
+\\
+\pred{todosLosQueEstanEnResSonParesExclusivos}{am : AirMiles, s : \seq{tupla\tupla{Usuario, Usuario}}}{
+(\forall k : Z)(0\leq k < |s| \implicaLuego ((s[k]_0 \in am.historiales \land s[k]_1\in am.historiales) \ \yLuego \\ sonParejaTransferidores(am.historiales,s[k]_0,s[k]_1)))
 }
 \\
 \\
