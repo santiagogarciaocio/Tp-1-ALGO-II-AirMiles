@@ -49,9 +49,9 @@
     \item[]Distancia ES $\mathbb{R}$
     \item[]enum Accion ES \{\ "Transferir","Recibir","Canjear","Acumular","Referidor","Referido" \}\
     \item[]Millas ES $\mathbb{R}$
-    \item[]CanjeadoReferido ES tupla $\tupla{Accion, Millas}$
+    \item[]CanjeadoReferido ES struct $\struct{transaccion: String,millas: Millas}$
     \item[]CanjeadosReferidos ES $\seq{CanjeadoReferido}$ 
-    \item[]Transferencia ES tupla $\tupla{Accion, Millas, Usuario}}$
+    \item[]Transferencia ES struct $\struct{transaccion: String,millas: Millas,usuario: Usuario}}$
     \item[]Transferencias ES $\seq{Transferencia}$     
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     \item[]Historial ES struct $\langle$canjeadosreferidos: CanjeadosReferidos, vuelos: Vuelos, transferencias: Transferencias$\rangle$
@@ -106,7 +106,7 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
     \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\ am.promocionesConTope = AM_0.promocionesConTope \land \\
-    am.historiales[usuarioReferido] = <canjeadosreferidos: <("Referido",500)> , \\ vuelos:<>,transferencias:<>>\land \\
+    am.historiales[usuarioReferido] = <canjeadosreferidos: <\struct{transaccion:"Referido",millas:500}> ,  vuelos:<>,transferencias:<>>\land \\
     esCanjeadosReferidosActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
                     }
@@ -308,13 +308,13 @@
 \end{proc}
 
 \\
-\pred{esCanjeadosReferidosActualizado}{hist:Historial,hist0:Historial,accion:Accion,millas:Millas}{
-hist = <canjeadosreferidos : hist0.canjeadosreferidos++\tupla{accion,millas}, vuelos : hist0.vuelos, transferencias : hist0.transferencias  >
+\pred{esCanjeadosReferidosActualizado}{hist:Historial,hist0:Historial,transaccion:String,millas:Millas}{
+hist = <canjeadosreferidos : hist0.canjeadosreferidos++\seq{\struct{transaccion: transaccion,millas: millas}}, vuelos : hist0.vuelos, transferencias : hist0.transferencias  >
 }
 \\
 \\
-\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,accion:Accion,millas:Milla,usuario:Usuario}{\\
-hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\tupla{accion,millas,usuario}  >
+\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,transaccion:String,millas:Milla,usuario:Usuario}{\\
+hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\seq{\struct{transaccion: transaccion,millas: millas,usuario: usuario}}  >
 }
 \\
 \\
@@ -399,9 +399,9 @@ IfThenElse(esBronce(hist),1,0) + IfThenElse(esPlata(hist),1.5,0) \\
 \\
 \aux{millasTotales}{hist: Historial}{\R}{ \\ 
 \sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i].millas + \\
-\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i]_0 = "Canjear" ,\\0,hist.canjeadosreferidos[i]_1)+\\
+\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i].transaccion = "Canjear" ,\\0,hist.canjeadosreferidos[i].millas)+\\
 \sum_{i=0}^{|hist.transferencias|-1}
-IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_1,hist.transferencias[i]_1)
+IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transferencias[i].millas,hist.transferencias[i].millas)
 }
 \\
 \\
@@ -410,25 +410,25 @@ IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_
 \\
 \aux{millasDisponibles}{hist: Historial}{\R}{\\
 \sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i].millas + \\
-\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i]_0 = "Canjear" ,\\-1*hist.canjeadosreferidos[i]_1,hist.canjeadosreferidos[i]_1)+\\
+\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i].transaccion = "Canjear" ,\\-1*hist.canjeadosreferidos[i].millas,hist.canjeadosreferidos[i].millas)+\\
 \sum_{i=0}^{|hist.transferencias|-1}
-IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_1,hist.transferencias[i]_1)
+IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transferencias[i].millas,hist.transferencias[i].millas)
 }
 \\
 \\
 \aux{acumuladoPorViajes}{hist:Historial}{Millas}{ \\ $\sum_{i=0}^{|hist.vuelos|-1}$ hist.vuelos[i].millas}
 \\
 \\
-\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadosreferidos|-1}$ \\ifThenElse(hist.canjeadosreferidos[i]_0  ="Canjear",hist.canjeadosreferidos[i]_1,0)}
+\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadosreferidos|-1}$ \\ifThenElse(hist.canjeadosreferidos[i].transaccion  ="Canjear",hist.canjeadosreferidos[i].millas,0)}
 \\
 \\
-\aux{totalGastadas}{trans:Transacciones}{Millas}{\\$\sum_{i=0}^{|trans|-1}$ \\ifThenElse(trans[i]_0 \in \seq{"Canjear","Transferir"},trans[i]_1,0)}
+\aux{totalGastadas}{hist:Historial}{Millas}{totalCanjeadas(hist) + totalTransferidas(hist)}
 \\
 \\
-\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i]_0 = "Transferir",hist.transferencias[i]_1,0)}
+\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].transaccion = "Transferir",hist.transferencias[i].millas,0)}
 \\
 \\
-\aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i]_0 = "Recibir",hist.transferencias[i]_1,0)}
+\aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].transaccion = "Recibir",hist.transferencias[i].millas,0)}
 \\
 \\
 \aux{cantidadDeApariciones}{s : \seq{T}, elem : T}{\Z}{
