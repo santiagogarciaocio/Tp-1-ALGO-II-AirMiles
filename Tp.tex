@@ -200,7 +200,7 @@
     \aseguraLargo{
         (|am.historiales|<n \implies |res| = |am.historiales|) \land \\
         (|am.historiales|\geq n \implies |res| = n) \land \\ 
-        ((\forall j,k \in Usuario)(\ j\in res \land k\in res) \implies j \neq k) \land \\
+        sinRepetidos(res) \land \\
         ((\forall u \in Usuario)  \ u\in res \implies u \in am.historiales) \land_L \\
         listaOrdenadaPorMillasDisponibles(am, res) \land \\\lnot existeUsuarioFueraDeListaConMasMillasQueElQueMenosTiene(am, res)                       
     }
@@ -303,7 +303,7 @@
 }
     \requiere{True}
     \aseguraLargo{
-        (sinRepetidosNiAnagramas(res) \land \\
+        sinRepetidos(res) \land sinAnagramas(res) \land \\
         (\forall i,j \in Z)(((i,j \in am.historiales \ \land i\neq j)\ \yLuego \\ sonParejaTransferidores(am.historiales,i,j))\implicaLuego (\tupla{i,j} \in res \lor \tupla{j,i} \in res )) \land \\ 
         (\forall k : Z)(0\leq k < |res| \implicaLuego ((res[k]_0 \in am.historiales \land res[k]_1\in am.historiales) \ \yLuego \\ sonParejaTransferidores(am.historiales,res[k]_0,res[k]_1)))
     }
@@ -357,8 +357,13 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 }
 \\
 \\
-\pred {sinRepetidosNiAnagramas}{seqTuplUsu:\seq{\tupla{Usuario,Usuario}}}{\\
-    (\forall i,j \in Z)(0 \leq i,j < |seqTuplUsu|\ \land \ i\neq j\ \implicaLuego ((seqTuplUsu[i]_0 \neq seqTuplUsu[j]_0 \land seqTuplUsu[i]_1 \neq seqTuplUsu[j]_1) \land \\(seqTuplUsu[i]_0 \neq seqTuplUsu[j]_1 \land \ seqTuplUsu[i]_1 \neq seqTuplUsu[j]_0)))
+\pred{sinAnagramas}{s : \seq{\tupla{\Z,\Z}}}{
+(\forall i \in \Z)(0 \leq i < |s| \implicaLuego noEstaSuAnagrama(s,s[i]))
+}
+\\
+\\
+\pred{noEstaSuAnagrama}{s : \seq{\tupla{\Z,\Z}},tupla : \tupla{\Z,\Z}}{\\
+\lnot (\exists i \in \Z)(0 \leq i < |s| \implicaLuego (s[i]_0 = tupla_1 \land s[i]_1 = tupla_0))
 }
 \\
 \\
@@ -380,6 +385,11 @@ cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categor
 \\
 \pred{listaOrdenadaPorMillasDisponibles}{am : AirMiles, s : \seq{Usuario}}{ \\
 (\forall i \in Usuario) \ 0 \leq i < |s| - 1 \implicaLuego millasDisponibles(am.historiales[s[i]]) \geq \\millasDisponibles(am.historiales[s[i+1]])
+}
+\\
+\\
+\pred{sinRepetidos}{s : \seq{T}}{
+(\forall i \in \Z)(0 \leq i < |s| \implicaLuego cantidadDeApariciones(s,s[i]) = 1) 
 }
 \\
 \\
@@ -423,7 +433,10 @@ IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_
 \aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i]_0 = "Recibir",hist.transferencias[i]_1,0)}
 \\
 \\
-
+\aux{cantidadDeApariciones}{s : \seq{T}, elem : T}{\Z}{
+$\sum_{i=0}^{|s|-1}$ ifThenElse(s[i] = elem,1,0)
+\\
+\\
 
 
 \end{tad}
