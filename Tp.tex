@@ -41,10 +41,8 @@
 
 \begin{itemize}
     \item[]NombrePromocion ES String
-    \item[]PromocionActiva ES tupla $\tupla{Factor, tieneTope, montoTope}$
-    \item[]Factor ES $\mathbb{R}$ 
-    \item[]tieneTope ES Bool
-    \item[]montoTope ES $\mathbb{Z}$    
+    \item[]PromocionConTope ES struct $\tupla{factor: Factor, tope: \Z}$
+    \item[]Factor ES $\mathbb{R}$     
     \item[]Usuario ES $\mathbb{Z}$  
     \item[]Vuelo ES tupla $ \tupla{Distancia,Millas,NombrePromocion,Factor}$
     \item[]Vuelos ES $\seq{Vuelo}$
@@ -58,7 +56,8 @@
     \item[]enum Categoria ES \{\ "Bronce","Plata","Oro","Platino"\}\
     \item[]Historial ES struct $\langle$canjeadosreferidos: CanjeadosReferidos, vuelos: Vuelos, transferencias: Transferencias$\rangle$
     \item[] Historiales ES $\Diccionario{Usuario}{Historial}$
-    \item[] Promociones ES $\Diccionario{NombrePromocion}{PromocionActiva}$
+    \item[] PromocionesSinTope ES $\Diccionario{NombrePromocion}{Factor}$ 
+    \item[] PromocionesConTope ES $\Diccionario{NombrePromocion}{PromocionConTope}$
     
 \end{itemize}
 
@@ -69,7 +68,9 @@
 
 \obs{historiales}{Historiales}
 \\
-\obs{promociones}{Promociones}
+\obs{promocionesSinTope}{PromocionesSinTope}
+\\
+\obs{promocionesConTope}{PromocionesConTope}
 \\
 
 
@@ -79,7 +80,8 @@
 }
     \requiere{True}
     \aseguraLargo{
-        res.promociones =  <"NoPromo":(1,False,0)>  \land \\
+        res.promocionesSinTope =  <"NoPromo": 1>  \land \\
+        res.promocionesConTope = <> \land \\
         res.historiales = <>         
         }
 \end{proc}
@@ -92,7 +94,7 @@
 {}
     \requiere{am=AM_0   \land  usuario \notin AM_0.historiales }
     \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadosreferidos:<>,vuelos:<>,transferencias:<>\ >) \ \land \
-        am.promociones = AM_0.promociones
+        am.promocionesSinTope = AM_0.promocionesSinTope \land \\am.promocionesConTope = AM_0.promocionesConTope
         }
 \end{proc}
 
@@ -105,7 +107,7 @@
 {} 
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
-    \aseguraLargo{am.promociones = AM_0.promociones \land \\
+    \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\ am.promocionesConTope = AM_0.promocionesConTope \land \\
     am.historiales[usuarioReferido] = <canjeadosreferidos: <("Referido",500)> , \\ vuelos:<>,transferencias:<>>\land \\
     esCanjeadosReferidosActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
@@ -120,11 +122,11 @@
 \In distancia: Distancia,
 \In promocion: NombrePromocion
 }{}
-    \requiere{am = AM_0 \land usuario \in AM_0.historiales \land promocion \in AM_0.promociones \land \\
-                (esPromocionSinTope(AM_0.promociones, promocion)\lor \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
+    \requiere{am = AM_0 \ \land \ usuario \in AM_0.historiales \ \land \ (promocion \in AM_0.promocionesSinTope \ \lor promocion \in AM_0.promocionesConTope) \land_L \\
+                (esPromocionSinTope(AM_0.promociones, promocion) \ \lor_L \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
     }
-    \aseguraLargo{  esVueloActualizado(am,AM_0,usuario,distancia,categoria(AM_0.historial[usuario]),promocion)\ \land 
-    (esPromocionSinTope(AM_0, promocion) \implies am.promociones = AM_0.promociones) \land (esPromocionConTope(AM_0, promocion) \ \land \\ alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies am.promociones = delKey(AM_0.promociones, promocion)) \ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)))) \\
+    \aseguraLargo{  esVueloActualizado(am,AM_0,usuario,distancia,categoria(AM_0.historial[usuario]),promocion)\ \land am.promocionesSinTope = AM_0.promocionesSinTope \land \\
+    (esPromocionSinTope(AM_0, promocion) \implies am.promocionesConTope = AM_0.promocionesConTope) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia,\\ categoria(AM_0.historial[usuario]), promocion) \implies \\ am.promocionesConTope = delKey(AM_0.promocionesConTope, promocion)) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)))) \\
           }
 
 \end{proc}
@@ -138,7 +140,8 @@
 }{}
     \requiere{am=AM_0\  \land \ usuario\in AM_0.historiales  \land \\ millas \leq millasDisponibles(AM_0.historiales[usuario])}
     \aseguraLargo{
-        am.promociones = AM_0.promociones \land \\
+        am.promocionesSinTope = AM_0.promocionesSinTope \land \\
+        am.promocionesConTope = AM_0.promocionesConTope \land \\
         igualSalvo(am.historiales,AM_0.historiales,\tupla{usuario}) \land \\
         esCanjeadosReferidosActualizado(am.historiales[usuario],\\AM_0.historiales[usuario],"Canjear",millas) 
                 }
@@ -153,7 +156,8 @@
 \In millas : Millas
 }{}    
     \requiere{am=AM_0 \land dador \in AM_0.historiales \land \\receptor \in AM_0.historiales \land \\ dador \neq receptor \land \\ millasDisponibles(AM_0.historiales[dador]) \geq millas}
-    \aseguraLargo{am.promociones = AM_0.promociones \land \\
+    \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\
+        am.promocionesConTope = AM_0.promocionesConTope \land \\
                 igualSalvo(am.historiales,AM_0.historiales,\tupla{dador,receptor}) \land \\
                 esTransferenciasActualizado(am.historiales[dador],\\AM_0.historiales[dador],"Transferir",millas,receptor) \land \\
                 esTransferenciasActualizado(am.historiales[receptor],\\AM_0.historiales[receptor],"Recibir",millas,dador) 
@@ -227,9 +231,10 @@
 \In nombrePromocion : NombrePromocion,
 \In factor : Factor
 }{}
-    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promociones}
+    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promocionesSinTope \land nombrePromocion \notin AM_0.promocionesConTope}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,False,0})       
+        am.promocionesConTope = AM_0.promocionesConTope \land \\
+        am.promocionesSinTope = setKey(AM_0.promocionesSinTope,nombrePromocion, factor)       
         }
 \end{proc}
 
@@ -241,9 +246,10 @@
 \In factor : Factor,
 \In tope : montoTope
 }{}
-    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promociones}
+    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promocionesSinTope \land nombrePromocion \notin AM_0.promocionesConTope}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = setKey(AM_0.promociones,nombrePromocion, \tupla{factor,True,tope})
+        am.promocionesSinTope = AM_0.promocionesSinTope \land \\
+        am.promocionesConTope = setKey(AM_0.promocionesConTope,nombrePromocion, \struct{factor:factor,tope:tope})
     }
 \end{proc}
 
@@ -253,9 +259,9 @@
 \Inout am:AirMiles,
 \In nombrePromocion : NombrePromocion
 }{}
-    \requiere{am=AM_0\ \land  \ nombrePromocion \in AM_0.promociones\ \land \ nombrePromocion \neq "NoPromo"}
+    \requiere{am=AM_0\ \land  \ (nombrePromocion \in AM_0.promocionesSinTope \ \lor \\ nombrePromocion \in AM_0.promocionesConTope) \land \ nombrePromocion \neq "NoPromo"}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
-        am.promociones = delKey(AM_0.promociones,nombrePromocion)
+        (esPromocionSinTope(AM_0,nombrePromocion) \implicaLuego \\(am.promocionesSinTope = delKey(AM_0.promocionesSinTope,nombrePromocion)\ \land \\ am.promocionesConTope = AM_0.promocionesConTope)) \\ \land \\ (esPromocionConTope(AM_0,nombrePromocion) \implicaLuego \\(am.promocionesConTope = delKey(AM_0.promocionesConTope,nombrePromocion)\ \land \\ am.promocionesSinTope = AM_0.promocionesSinTope))
     }
 \end{proc}
 
@@ -320,10 +326,10 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 }
 \\
 \\
-\pred{esPromocionSinTope}{am : AirMiles, promocion : NombrePromocion}{ \\ am.promociones[promocion]_1 = False}
+\pred{esPromocionSinTope}{am : AirMiles, promocion : NombrePromocion}{ \\promocion \in am.promocionesSinTope}
 \\
 \\
-\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{ \\ am.promociones[promocion]_1 = True}
+\pred{esPromocionConTope}{am : AirMiles, promocion : NombrePromocion}{ \\promocion \in am.promocionesConTope}
 \\
 \\
 \pred{esBronce}{hist:Historial}{millasTotales(hist) < 10.000}
@@ -339,7 +345,8 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 \\
 \\
 \pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
-am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, \\ vuelos: AM_0.historiales[u].vuelos ++ \seq{\tupla{d,d*factorPromo(AM_0,p)*cat,p,factorPromo(AM_0,p)}},\\ transferencias: AM_0.historiales[u].transferencias>)
+(esPromocionConTope(AM_0,p) \implicaLuego (am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\tupla{d,d*AM_0.promocionesConTope[p].factor*cat,p,AM_0.promocionesConTope[p].factor}},\\ transferencias: AM_0.historiales[u].transferencias>))) \\ \land \\
+(esPromocionSinTope(AM_0,p) \implicaLuego (am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\tupla{d,d*AM_0.promocionesSinTope[p]*cat,p,AM_0.promocionesSinTope[p]}},\\ transferencias: AM_0.historiales[u].transferencias>)))
 }
 \\
 \\
@@ -356,14 +363,14 @@ am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.histori
 \\
 \\
 \pred{noSePasaDeTope}{am : AirMiles, usuario : Usuario, distancia : Distancia, \\ promocion : NombrePromocion}{ \\
-cantidadMillasAGanar(distancia,factorPromo(am.promociones,promocion),\\categoria(am.historiales[usuario]) \leq \\ millasDisponiblesEnPromo(am.promociones,promocion)
+cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categoria(am.historiales[usuario]) \leq am.promocionesConTope[promocion].tope
 }
 \\
 \\
-\pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones[promocion]_2 = distancia * categoria * factorPromo(am, promocion)}
+\pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope[promocion].tope = distancia * categoria * am.promocionesConTope[promocion].factor}
 \\
 \\
-\pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promociones = setKey(AM_0, promocion, \\ \tupla{AM_0.promociones[promocion]_0,AM_0.promociones[promocion]_1, \\ AM_0.promociones[promocion]_2-cantidadMillasAGanar(distancia,AM_0.promociones[promocion]_0,categoria))}}
+\pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope = setKey(AM_0, promocion, \\ \struct{factor: AM_0.promociones[promocion].factor, tope:  AM_0.promociones[promocion].tope- \\cantidadMillasAGanar(distancia,AM_0.promociones[promocion].factor,categoria))}}
 \\
 \\
 \pred{existeUsuarioFueraDeListaConMasMillasQueElQueMenosTiene}{am : AirMiles, s : \seq{Usuario}}{
@@ -391,14 +398,6 @@ IfThenElse(hist.transferencias[i]_0 = "Transferir", \\-1*hist.transferencias[i]_
 \\
 \\
 \aux{cantidadMillasAGanar}{dist:Distancia,fact:Factor,cate:R}{Millas}{dist*fact*cate}
-\\
-\\
-\aux{factorPromo}{am : AirMiles, promocion : NombrePromocion}{Factor}{am.promociones[promocion]_0}
-\\
-\\
-\aux{millasDisponiblesEnPromo}{promos:Promociones, promo:NombrePromocion}{Millas}{promos[promocion]_2}
-\\
-\\
 \\
 \\
 \aux{millasDisponibles}{hist: Historial}{\R}{\\
