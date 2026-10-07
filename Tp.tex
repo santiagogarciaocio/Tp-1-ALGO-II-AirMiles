@@ -123,7 +123,7 @@
                 (esPromocionSinTope(AM_0.promociones, promocion) \ \lor_L \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
     }
     \aseguraLargo{  esVueloActualizado(am,AM_0,usuario,distancia,categoria(AM_0.historial[usuario]),promocion)\ \land am.promocionesSinTope = AM_0.promocionesSinTope \land \\
-    (esPromocionSinTope(AM_0, promocion) \implies am.promocionesConTope = AM_0.promocionesConTope) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia,\\ categoria(AM_0.historial[usuario]), promocion) \implies \\ am.promocionesConTope = delKey(AM_0.promocionesConTope, promocion)) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)))) \\
+    (esPromocionSinTope(AM_0, promocion) \implies am.promocionesConTope = AM_0.promocionesConTope) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia,\\ categoria(AM_0.historial[usuario]), promocion) \implies \\ am.promocionesConTope = delKey(AM_0.promocionesConTope, promocion)) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)) \\
           }
 
 \end{proc}
@@ -317,6 +317,11 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 }
 \\
 \\
+\pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
+ am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: \\AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\struct{distancia: d,millas: d*factorPromo(am,p)*cat,promocion: p,factor: factorPromo(am,p)}},\\ transferencias: AM_0.historiales[u].transferencias>) \\ \
+}
+\\
+\\
 \pred{igualSalvo}{dict1: dicc<K, V>, dict2: dicc<K, V>, ignorar: \conj{Usuario}}{\\
     (\forall i : K) ((i \in dict1 \land i \notin ignorar) \implicaLuego (i \in dict2 \yLuego dict1[i] = dict2[i])) \land \\
     (\forall j : K) (j \in dict2 \land j \notin ignorar) \implicaLuego (j \in dict1 \yLuego dict1[j] = dict2[j]) 
@@ -339,12 +344,6 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 \\
 \\
 \pred{esPlatino}{hist:Historial}{millasTotales(hist) \geq 1.000.000}
-\\
-\\
-\pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
-(esPromocionConTope(AM_0,p) \implicaLuego (am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\struct{distancia: d,millas: d*AM_0.promocionesConTope[p].factor*cat,promocion: p,factor: AM_0.promocionesConTope[p].factor}},\\ transferencias: AM_0.historiales[u].transferencias>))) \\ \land \\
-(esPromocionSinTope(AM_0,p) \implicaLuego (am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\struct{distancia: d,millas: d*AM_0.promocionesSinTope[p]*cat,promocion: p,\\factor: AM_0.promocionesSinTope[p]}}, transferencias: AM_0.historiales[u].transferencias>)))
-}
 \\
 \\
 \pred{sonParejaTransferidores}{hist: Historiales, usuario1:Usuario,\\ usuario2:Usuario}{\\
@@ -400,6 +399,9 @@ cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categor
 }
 \\
 \\
+\aux{factorPromo}{am : AirMiles, promocion : NombrePromocion}{Factor}{\\IfThenElse(esPromocionSinTope(am, promocion),am.promocionesSinTope[promocion],\\am.promocionesConTope[promocion].factor)}
+\\
+\\
 \aux{categoria}{hist:Historial}{\R}{
 IfThenElse(esBronce(hist),1,0) + IfThenElse(esPlata(hist),1.5,0) \\
 + IfThenElse(esOro(hist),2,0)
@@ -440,7 +442,7 @@ IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transfer
 \aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].transaccion = "Recibir",hist.transferencias[i].millas,0)}
 \\
 \\
-\aux{cantidadDeApariciones}{s : \seq{T}, elem : T}{\Z}{
+\aux{cantidadDeApariciones}{s : $\seq{T}$, elem : T}{\Z}{
 $\sum_{i=0}^{|s|-1}$ ifThenElse(s[i] = elem,1,0)
 \\
 \\
