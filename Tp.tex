@@ -7,7 +7,7 @@
 
 
 \titulo{Trabajo práctico}
-\subtitulo{Especificacion TAD: Sistema de Fidelizaci´on AirMiles}
+\subtitulo{Especificacion TAD: Sistema de Fidelización AirMiles}
 
 \fecha{\today}
 
@@ -243,7 +243,7 @@
 \In factor : Factor,
 \In tope : montoTope
 }{}
-    \requiere{am=AM_0 \land factor \geq 1 \land nombrePromocion \notin AM_0.promocionesSinTope \land nombrePromocion \notin AM_0.promocionesConTope}
+    \requiere{am=AM_0 \land factor \geq 1 \land tope \gep 1 \land nombrePromocion \notin AM_0.promocionesSinTope \land nombrePromocion \notin AM_0.promocionesConTope}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\
         am.promocionesConTope = setKey(AM_0.promocionesConTope,nombrePromocion, \struct{factor:factor,tope:tope})
@@ -371,11 +371,11 @@ cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categor
 \pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope[promocion].tope = distancia * categoria * am.promocionesConTope[promocion].factor}
 \\
 \\
-\pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope = setKey(AM_0, promocion, \\ \struct{factor: AM_0.promociones[promocion].factor, tope:  AM_0.promociones[promocion].tope- \\cantidadMillasAGanar(distancia,AM_0.promociones[promocion].factor,categoria))}}
+\pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope = setKey(AM_0.promocionesConTope, promocion, \\ \struct{factor: AM_0.promociones[promocion].factor, tope:  AM_0.promociones[promocion].tope- \\cantidadMillasAGanar(distancia,AM_0.promociones[promocion].factor,categoria)})}
 \\
 \\
 \pred{existeUsuarioFueraDeListaConMasMillasQueElQueMenosTiene}{am : AirMiles, s : \seq{Usuario}}{
-(\exists u \in Usuario) u \in am.historiales \land  u \notin s \land_L \\millasDisponibles(am.historiales[u]) > millasDisponibles(am.historiales[s[|s|-1]])
+(\exists u \in Usuario) (u \in am.historiales \land  u \notin s) \yLuego \\millasDisponibles(am.historiales[u]) > millasDisponibles(am.historiales[s[|s|-1]])
 }
 \\
 \\
