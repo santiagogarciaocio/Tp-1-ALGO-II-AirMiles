@@ -48,12 +48,12 @@
     \item[]Vuelos ES $\seq{Vuelo}$
     \item[]Distancia ES $\mathbb{R}$
     \item[]Millas ES $\mathbb{R}$
-    \item[]CanjeadoReferido ES struct $\struct{transaccion: String,millas: Millas}$
-    \item[]CanjeadosReferidos ES $\seq{CanjeadoReferido}$ 
-    \item[]Transferencia ES struct $\struct{transaccion: String,millas: Millas,usuario: Usuario}}$
+    \item[]CanjeadaYReferida ES struct $\struct{transaccion: String,millas: Millas}$
+    \item[]CanjeadasYReferidas ES $\seq{CanjeadaYReferida}$ 
+    \item[]Transferencia ES struct $\struct{millas: Millas,usuario: Usuario}}$
     \item[]Transferencias ES $\seq{Transferencia}$     
     \item[]Categoria ES String
-    \item[]Historial ES struct $\langle$canjeadosreferidos: CanjeadosReferidos, vuelos: Vuelos, transferencias: Transferencias$\rangle$
+    \item[]Historial ES struct $\langle$canjeadasyreferidas: CanjeadasYReferidas, vuelos: Vuelos, transferencias: Transferencias$\rangle$
     
     
 \end{itemize}
@@ -90,7 +90,7 @@
 }
 {}
     \requiere{am=AM_0   \land  usuario \notin AM_0.historiales }
-    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadosreferidos:<>,vuelos:<>,transferencias:<>\ >) \ \land \
+    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadasyreferidas:<>,vuelos:<>,transferencias:<>\ >) \ \land \
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\am.promocionesConTope = AM_0.promocionesConTope
         }
 \end{proc}
@@ -105,8 +105,8 @@
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
     \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\ am.promocionesConTope = AM_0.promocionesConTope \land \\
-    am.historiales[usuarioReferido] = <canjeadosreferidos: <\struct{transaccion:"Referido",millas:500}> ,  vuelos:<>,transferencias:<>>\land \\
-    esCanjeadosReferidosActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
+    am.historiales[usuarioReferido] = <canjeadasyreferidas: <\struct{transaccion:"Referido",millas:500}> ,  vuelos:<>,transferencias:<>>\land \\
+    esCanjeadasYReferidasActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
                     }
 \end{proc}
@@ -140,7 +140,7 @@
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\
         am.promocionesConTope = AM_0.promocionesConTope \land \\
         igualSalvo(am.historiales,AM_0.historiales,\tupla{usuario}) \land \\
-        esCanjeadosReferidosActualizado(am.historiales[usuario],\\AM_0.historiales[usuario],"Canjear",millas) 
+        esCanjeadasYReferidasActualizado(am.historiales[usuario],\\AM_0.historiales[usuario],"Canjear",millas) 
                 }
 \end{proc}
 
@@ -156,8 +156,8 @@
     \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\
         am.promocionesConTope = AM_0.promocionesConTope \land \\
                 igualSalvo(am.historiales,AM_0.historiales,\tupla{dador,receptor}) \land \\
-                esTransferenciasActualizado(am.historiales[dador],\\AM_0.historiales[dador],"Transferir",millas,receptor) \land \\
-                esTransferenciasActualizado(am.historiales[receptor],\\AM_0.historiales[receptor],"Recibir",millas,dador) 
+                esTransferenciasActualizado(am.historiales[dador],\\AM_0.historiales[dador],-1*(millas),receptor) \land \\
+                esTransferenciasActualizado(am.historiales[receptor],\\AM_0.historiales[receptor],millas,dador) 
                     }  
 \end{proc}
 
@@ -198,7 +198,7 @@
         (|am.historiales|<n \implies |res| = |am.historiales|) \land \\
         (|am.historiales|\geq n \implies |res| = n) \land \\ 
         sinRepetidos(res) \land \\
-        ((\forall u \in Usuario)  \ u\in res \implies u \in am.historiales) \land_L \\
+        ((\forall u \in Usuario)  \ u\in res \implies u \in am.historiales) \yLuego \\
         listaOrdenadaPorMillasDisponibles(am, res) \land \\\lnot existeUsuarioFueraDeListaConMasMillasQueElQueMenosTiene(am, res)                       
     }
 \end{proc}
@@ -300,25 +300,25 @@
 }
     \requiere{True}
     \aseguraLargo{
-        sinRepetidos(res) \land sinAnagramas(res) \land \\
+        sinRepetidos(res) \land sinPermutaciones(res) \land \\
         todosLosParesExclusivosDeHistorialesEstanEnRes(am, res) \land \\ 
         todosLosQueEstanEnResSonParesExclusivos(am, res)
     }
 \end{proc}
 
 \\
-\pred{esCanjeadosReferidosActualizado}{hist:Historial,hist0:Historial,transaccion:String,millas:Millas}{
-hist = <canjeadosreferidos : hist0.canjeadosreferidos++\seq{\struct{transaccion: transaccion,millas: millas}}, vuelos : hist0.vuelos, transferencias : hist0.transferencias  >
+\pred{esCanjeadasYReferidasActualizado}{hist:Historial,hist0:Historial,transaccion:String,millas:Millas}{
+hist = <canjeadasyreferidas : hist0.canjeadasyreferidas++\seq{\struct{transaccion: transaccion,millas: millas}}, vuelos : hist0.vuelos, transferencias : hist0.transferencias  >
 }
 \\
 \\
-\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,transaccion:String,millas:Milla,usuario:Usuario}{\\
-hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\seq{\struct{transaccion: transaccion,millas: millas,usuario: usuario}}  >
+\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,millas:Milla,usuario:Usuario}{\\
+hist = <canjeadasyreferidas : hist0.canjeadasyreferidas, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\seq{\struct{millas: millas,usuario: usuario}}  >
 }
 \\
 \\
 \pred{esVueloActualizado}{am : AirMiles, AM_0 : AirMiles, u : Usuario, d : Distancia, cat : R, p : NombrePromocion}{ \\
- am.historiales = setKey(AM_0.historiales, u,   <canjeadosreferidos: \\AM_0.historiales[u].canjeadosreferidos, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\struct{distancia: d,millas: d*factorPromo(am,p)*cat,promocion: p,factor: factorPromo(am,p)}},\\ transferencias: AM_0.historiales[u].transferencias>) \\ \
+ am.historiales = setKey(AM_0.historiales, u,   <canjeadasyreferidas: \\AM_0.historiales[u].canjeadasyreferidas, vuelos: AM_0.historiales[u].vuelos ++ \\\seq{\struct{distancia: d,millas: d*factorPromo(am,p)*cat,promocion: p,factor: factorPromo(am,p)}},\\ transferencias: AM_0.historiales[u].transferencias>) \\ \
 }
 \\
 \\
@@ -353,12 +353,12 @@ hist = <canjeadosreferidos : hist0.canjeadosreferidos, vuelos : hist0.vuelos, tr
 }
 \\
 \\
-\pred{sinAnagramas}{s : \seq{\tupla{\Z,\Z}}}{
-(\forall i \in \Z)(0 \leq i < |s| \implicaLuego noEstaSuAnagrama(s,s[i]))
+\pred{sinPermutaciones}{s : \seq{\tupla{\Z,\Z}}}{
+(\forall i \in \Z)(0 \leq i < |s| \implicaLuego noEstaSuPermutacion(s,s[i]))
 }
 \\
 \\
-\pred{noEstaSuAnagrama}{s : \seq{\tupla{\Z,\Z}},tupla : \tupla{\Z,\Z}}{\\
+\pred{noEstaSuPermutacion}{s : \seq{\tupla{\Z,\Z}},tupla : \tupla{\Z,\Z}}{\\
 \lnot (\exists i \in \Z)(0 \leq i < |s| \implicaLuego (s[i]_0 = tupla_1 \land s[i]_1 = tupla_0))
 }
 \\
@@ -410,9 +410,8 @@ IfThenElse(esBronce(hist),1,0) + IfThenElse(esPlata(hist),1.5,0) \\
 \\
 \aux{millasTotales}{hist: Historial}{\R}{ \\ 
 \sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i].millas + \\
-\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i].transaccion = "Canjear" ,\\0,hist.canjeadosreferidos[i].millas)+\\
-\sum_{i=0}^{|hist.transferencias|-1}
-IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transferencias[i].millas,hist.transferencias[i].millas)
+\sum_{i=0}^{|hist.canjeadasyreferidas|-1} IfThenElse(hist.canjeadasyreferidas[i].transaccion = "Canjear" ,\\0,hist.canjeadasyreferidas[i].millas)+\\
+\sum_{i=0}^{|hist.transferencias|-1} hist.transferencias[i].millas
 }
 \\
 \\
@@ -421,25 +420,24 @@ IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transfer
 \\
 \aux{millasDisponibles}{hist: Historial}{\R}{\\
 \sum_{i=0}^{|hist.vuelos|-1}hist.vuelos[i].millas + \\
-\sum_{i=0}^{|hist.canjeadosreferidos|-1} IfThenElse(hist.canjeadosreferidos[i].transaccion = "Canjear" ,\\-1*hist.canjeadosreferidos[i].millas,hist.canjeadosreferidos[i].millas)+\\
-\sum_{i=0}^{|hist.transferencias|-1}
-IfThenElse(hist.transferencias[i].transaccion = "Transferir", \\-1*hist.transferencias[i].millas,hist.transferencias[i].millas)
+\sum_{i=0}^{|hist.canjeadasyreferidas|-1} IfThenElse(hist.canjeadasyreferidas[i].transaccion = "Canjear" ,\\-1*hist.canjeadasyreferidas[i].millas,hist.canjeadasyreferidas[i].millas)+\\
+\sum_{i=0}^{|hist.transferencias|-1} hist.transferencias[i].millas
 }
 \\
 \\
 \aux{acumuladoPorViajes}{hist:Historial}{Millas}{ \\ $\sum_{i=0}^{|hist.vuelos|-1}$ hist.vuelos[i].millas}
 \\
 \\
-\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadosreferidos|-1}$ \\ifThenElse(hist.canjeadosreferidos[i].transaccion  ="Canjear",hist.canjeadosreferidos[i].millas,0)}
+\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadasyreferidas|-1}$ \\ifThenElse(hist.canjeadasyreferidas[i].transaccion  ="Canjear",hist.canjeadasyreferidas[i].millas,0)}
 \\
 \\
 \aux{totalGastadas}{hist:Historial}{Millas}{totalCanjeadas(hist) + totalTransferidas(hist)}
 \\
 \\
-\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].transaccion = "Transferir",hist.transferencias[i].millas,0)}
+\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].millas \leq 0,-1*(hist.transferencias[i].millas),0)}
 \\
 \\
-\aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].transaccion = "Recibir",hist.transferencias[i].millas,0)}
+\aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].millas \geq 0,hist.transferencias[i].millas,0)}
 \\
 \\
 \aux{cantidadDeApariciones}{s : $\seq{T}$, elem : T}{\Z}{
