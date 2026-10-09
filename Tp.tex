@@ -243,7 +243,7 @@
 \In factor : Factor,
 \In tope : montoTope
 }{}
-    \requiere{am=AM_0 \land factor \geq 1 \land tope \gep 1 \land nombrePromocion \notin AM_0.promocionesSinTope \land nombrePromocion \notin AM_0.promocionesConTope}
+    \requiere{am=AM_0\ \land \ factor \geq 1 \ \land \ tope \geq 1 \ \land \ nombrePromocion \notin AM_0.promocionesSinTope \ \land nombrePromocion \notin AM_0.promocionesConTope}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\
         am.promocionesConTope = setKey(AM_0.promocionesConTope,nombrePromocion, \struct{factor:factor,tope:tope})
