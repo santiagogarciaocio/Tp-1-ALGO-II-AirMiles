@@ -90,11 +90,12 @@
 }
 {}
     \requiere{am=AM_0   \land  usuario \notin AM_0.historiales }
-    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadasyreferidas:<>,vuelos:<>,transferencias:<>\ >) \ \land \
+    \aseguraLargo{am.historiales = setKey(AM_0.historiales,usuario,<canjeadasyreferidas:<>,vuelos:<>,transferencias:<>\ >) \ \land \\
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\am.promocionesConTope = AM_0.promocionesConTope
         }
 \end{proc}
-
+\\
+\\
 \begin{proc}{registrarUsuarioConReferidor}
 {
 \Inout am: AirMiles, 
@@ -202,11 +203,7 @@
         listaOrdenadaPorMillasDisponibles(am, res) \land \\\lnot existeUsuarioFueraDeListaConMasMillasQueElQueMenosTiene(am, res)                       
     }
 \end{proc}
-
-
-
-
-
+\\ \\ \\ \\ \\ \\
 \begin{proc}{resumenTransacciones}
 {
 \In am:AirMiles,
@@ -261,8 +258,7 @@
         (esPromocionSinTope(AM_0,nombrePromocion) \implicaLuego \\(am.promocionesSinTope = delKey(AM_0.promocionesSinTope,nombrePromocion)\ \land \\ am.promocionesConTope = AM_0.promocionesConTope)) \\ \land \\ (esPromocionConTope(AM_0,nombrePromocion) \implicaLuego \\(am.promocionesConTope = delKey(AM_0.promocionesConTope,nombrePromocion)\ \land \\ am.promocionesSinTope = AM_0.promocionesSinTope))
     }
 \end{proc}
-
-
+\\ \\ \\ \\ \\
 \begin{proc}{elQueTieneMasMillas}
 {
 \In am:AirMiles
