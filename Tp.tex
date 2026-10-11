@@ -105,7 +105,7 @@
 {} 
     \requiere{am=AM_0  \land usuarioReferidor \in AM_0.historiales \land\\
     usuarioReferido \notin AM_0.historiales} 
-    \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\ am.promocionesConTope = AM_0.promocionesConTope \land \\
+    \aseguraLargo{am.promocionesSinTope = AM_0.promocionesSinTope \land \\ am.promocionesConTope = AM_0.promocionesConTope \land \\ (usuarioReferido \in am.historiales \land usuarioReferidor \in am.historiales) \yLuego \\
     am.historiales[usuarioReferido] = <canjeadasyreferidas: <\struct{transaccion:"Referido",millas:500}> ,  vuelos:<>,transferencias:<>>\land \\
     esCanjeadasYReferidasActualizado(am.historiales[usuarioReferidor],\\AM_0.historiales[usuarioReferidor],"Referidor",500)\land \\
     igualSalvo(am.historiales,AM_0.historiales,\tupla{usuarioReferido,usuarioReferidor})
@@ -121,7 +121,7 @@
 \In promocion: NombrePromocion
 }{}
     \requiere{am = AM_0 \ \land \ usuario \in AM_0.historiales \ \land \ (promocion \in AM_0.promocionesSinTope \ \lor promocion \in AM_0.promocionesConTope) \land_L \\
-                (esPromocionSinTope(AM_0.promociones, promocion) \ \lor_L \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
+                (esPromocionSinTope(AM_0, promocion) \ \lor_L \\ noSePasaDeTope(AM_0, usuario, distancia, promocion) )               
     }
     \aseguraLargo{  esVueloActualizado(am,AM_0,usuario,distancia,categoria(AM_0.historial[usuario]),promocion)\ \land am.promocionesSinTope = AM_0.promocionesSinTope \land \\
     (esPromocionSinTope(AM_0, promocion) \implies am.promocionesConTope = AM_0.promocionesConTope) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \ alcanzaTope(AM_0, distancia,\\ categoria(AM_0.historial[usuario]), promocion) \implies \\ am.promocionesConTope = delKey(AM_0.promocionesConTope, promocion)) \\ \land \\ (esPromocionConTope(AM_0, promocion) \ \land \\ \lnot alcanzaTope(AM_0, distancia, categoria(AM_0.historial[usuario]), promocion) \implies \\ restaDelTope(am, AM_0, distancia, categoria(AM_0.historial[usuario]), promocion)) \\
