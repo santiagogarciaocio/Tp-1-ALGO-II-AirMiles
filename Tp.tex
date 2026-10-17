@@ -238,9 +238,9 @@
 \Inout am:AirMiles,
 \In nombrePromocion : NombrePromocion, \\
 \In nuevoFactor : Factor,
-\In nuevoTope : montoTope
+\In nuevoTope : \ $\mathbb{Z}$
 }{}
-    \requiere{am=AM_0\ \land \ factor \geq 1 \ \land \ tope \geq 1 \ \land \ nombrePromocion \notin AM_0.promocionesSinTope \ \land nombrePromocion \notin AM_0.promocionesConTope}
+    \requiere{am=AM_0\ \land \ nuevoFactor \geq 1 \ \land \ nuevoTope \geq 1 \ \land \ nombrePromocion \notin AM_0.promocionesSinTope \ \land nombrePromocion \notin AM_0.promocionesConTope}
     \aseguraLargo{am.historiales = AM_0.historiales \land \\
         am.promocionesSinTope = AM_0.promocionesSinTope \land \\
         am.promocionesConTope = setKey(AM_0.promocionesConTope,nombrePromocion, \struct{factor:nuevoFactor,tope:nuevoTope})
@@ -424,13 +424,13 @@ IfThenElse(esBronce(hist),1,0) + IfThenElse(esPlata(hist),1.5,0) \\
 \aux{acumuladoPorViajes}{hist:Historial}{Millas}{ \\ $\sum_{i=0}^{|hist.vuelos|-1}$ hist.vuelos[i].millas}
 \\
 \\
-\aux{totalCanjeadas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadasyreferidas|-1}$ \\ifThenElse(hist.canjeadasyreferidas[i].transaccion  ="Canjear",hist.canjeadasyreferidas[i].millas,0)}
+\aux{totalCanjeadas}{hist : Historial}{Millas}{\\$\sum_{i=0}^{|hist.canjeadasyreferidas|-1}$ \\ifThenElse(hist.canjeadasyreferidas[i].transaccion  ="Canjear",hist.canjeadasyreferidas[i].millas,0)}
 \\
 \\
-\aux{totalGastadas}{hist:Historial}{Millas}{totalCanjeadas(hist) + totalTransferidas(hist)}
+\aux{totalGastadas}{hist : Historial}{Millas}{totalCanjeadas(hist) + totalTransferidas(hist)}
 \\
 \\
-\aux{totalTransferidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].millas \leq 0,-1*(hist.transferencias[i].millas),0)}
+\aux{totalTransferidas}{hist : Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].millas \leq 0,-1*(hist.transferencias[i].millas),0)}
 \\
 \\
 \aux{totalRecibidas}{hist:Historial}{Millas}{\\$\sum_{i=0}^{|hist.transferencias|-1}$ \\ifThenElse(hist.transferencias[i].millas \geq 0,hist.transferencias[i].millas,0)}
