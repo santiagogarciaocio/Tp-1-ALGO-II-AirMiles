@@ -308,7 +308,7 @@ hist = <canjeadasyreferidas : hist0.canjeadasyreferidas++\seq{\struct{transaccio
 }
 \\
 \\
-\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,nuevasMillas:Milla,usuarioAActualizar:Usuario}{\\
+\pred{esTransferenciasActualizado}{hist:Historial,hist0:Historial,nuevasMillas:Millas,\\usuarioAActualizar:Usuario}{\\
 hist = <canjeadasyreferidas : hist0.canjeadasyreferidas, vuelos : hist0.vuelos, transferencias : hist0.transferencias++\seq{\struct{millas: nuevasMillas,usuario: usuarioAActualizar}}  >
 }
 \\
@@ -364,7 +364,7 @@ cantidadMillasAGanar(distancia,am.promocionesConTope[promocion].factor,\\categor
 }
 \\
 \\
-\pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope[promocion].tope = distancia * categoria * am.promocionesConTope[promocion].factor}
+\pred{alcanzaTope}{am : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope[promocion].tope = \\distancia * categoria * am.promocionesConTope[promocion].factor}
 \\
 \\
 \pred{restaDelTope}{am : AirMiles, AM_0 : AirMiles, distancia : Distancia, categoria : R, promocion : NombrePromocion}{am.promocionesConTope = setKey(AM_0.promocionesConTope, promocion, \\ \struct{factor: AM_0.promociones[promocion].factor, tope:  AM_0.promociones[promocion].tope- \\cantidadMillasAGanar(distancia,AM_0.promociones[promocion].factor,categoria)})}
